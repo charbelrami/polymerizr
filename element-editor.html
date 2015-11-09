@@ -1,0 +1,364 @@
+<!--
+@license
+Copyright (c) 2015 Charbel Rami. All rights reserved.
+MIT
+-->
+<dom-module id="element-editor">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 8px 5vw;
+      }
+      paper-dialog {
+        position: fixed;
+        width: 80vw;
+      }
+      paper-dropdown-menu {
+        width: 100%;
+      }
+      paper-fab {
+        --paper-fab: {
+          display: inline-block;
+        }
+      }
+      paper-toggle-button {
+        margin-top: 8px;
+      }
+      paper-toast {
+        left: auto;
+        right: 24px;
+        z-index: 1;
+      }
+      pre {
+        overflow: auto;
+      }
+    </style>
+    <span>
+      <paper-fab mini icon="remove" on-tap="_removeElement"></paper-fab>
+      <paper-tooltip>Remove</paper-tooltip>
+    </span>
+    <span>
+      <paper-fab mini icon="create" on-tap="_openDialog" data-dialog="dialog"></paper-fab>
+      <paper-tooltip>Edit</paper-tooltip>
+    </span>
+
+    <template is="dom-if" if="{{path}}">
+      <hydrolysis-analyzer src="{{path}}" analyzer="{{analysis}}"></hydrolysis-analyzer>
+    </template>
+
+    <hydrolysis-analyzer src="bower_components/paper-styles/color.html" analyzer="{{colorsAnalysis}}"></hydrolysis-analyzer>
+
+    <iron-meta type="iconset" list="{{iconsets}}"></iron-meta>
+
+    <paper-dialog id="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2>{{element}}</h2>
+      <paper-dialog-scrollable>
+        <h3>Booleans</h3>
+        <template is="dom-repeat" items="{{boolPropsArr}}">
+          <div>
+            <paper-toggle-button on-tap="_toggleAttr"></paper-toggle-button><span>{{item.name}}</span>
+            <small>{{item.desc}}</small>
+          </div>
+        </template>
+
+        <h3>Strings</h3>
+        <template is="dom-repeat" items="{{strPropsArr}}">
+          <div>
+            <paper-input on-input="_setAttr" label="{{item.name}}" type="text"></paper-input>
+            <small>{{item.desc}}</small>
+          </div>
+        </template>
+
+        <h3>Icon</h3>
+        <template is="dom-repeat" items="{{iconPropsArr}}">
+          <div>
+            {{item.name}} <small>{{item.desc}}</small>
+            <template is="dom-repeat" items="{{iconsets}}">
+              <paper-dropdown-menu label="{{item.name}}" selected-item-label="{{icon}}">
+                <paper-menu on-iron-select="_setIcon" class="dropdown-content">
+                  <template is="dom-repeat" items="{{_getIconNames(item)}}">
+                    <paper-item><iron-icon icon="{{item}}"></iron-icon>{{item}}</paper-item>
+                  </template>
+                </paper-menu>
+              </paper-dropdown-menu>
+            </template>
+          </div>
+        </template>
+
+        <h3>Numbers</h3>
+        <template is="dom-repeat" items="{{numPropsArr}}">
+          <div>
+            <paper-input on-input="_setAttr" label="{{item.name}}" type="number"></paper-input>
+          </div>
+        </template>
+
+        <h3>Style</h3>
+        <template is="dom-repeat" items="{{customPropsArr}}">
+          <div>
+            <paper-input on-input="_updateCustomProp" label="{{item}}" type="text"></paper-input>
+          </div>
+        </template>
+
+        <h4>Colors</h4>
+        <template is="dom-repeat" items="{{colorCustomPropsArr}}">
+          <paper-dropdown-menu label="{{item}}">
+            <paper-menu on-iron-select="_updateColorCustomProp" class="dropdown-content">
+              <template is="dom-repeat" items="{{colorsArr}}" as="color">
+                <paper-item style$="{{_dropdownItemBackgroundColor(color.value)}}">{{color.name}}</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+        </template>
+      </paper-dialog-scrollable>
+    </paper-dialog>
+
+    <div>
+      <content></content>
+    </div>
+
+    <pre><code>{{code}}</code></pre>
+
+    <pre><code><template is="dom-repeat" items="{{customPropsCodeArr}}"><div><span>{{item.name}}</span>: <span>{{item.value}}</span>;</div></template></code></pre>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'element-editor',
+
+        properties: {
+          element: {
+            type: String
+          },
+          path: {
+            type: String
+          },
+          boolPropsArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          strPropsArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          iconPropsArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          numPropsArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          customPropsArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          colorCustomPropsArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          colorsArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          code: {
+            type: String
+          },
+          customPropsCodeArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          }
+        },
+
+        observers: [
+          '_getProps(analysis.*)',
+          '_getColors(colorsAnalysis.*)'
+        ],
+
+        attached: function() {
+          var el = document.createElement(this.element);
+          el.classList.add('el');
+          Polymer.dom(this).appendChild(el);
+          this._cleanCodeOutput();
+        },
+
+        _getProps: function(val) {
+          var elements = val.value.elements;
+          var props = elements[0].properties;
+          var currentProp;
+          var currentPropType;
+          var currentPropName;
+          var currentPropDesc;
+          var i;
+          for (i = 0; i < props.length; i++) {
+            currentProp = props[i];
+            currentPropType = currentProp.type;
+            currentPropName = currentProp.name;
+            currentPropDesc = currentProp.desc;
+            if (currentPropType !== 'Function') {
+              if (currentPropType === 'Boolean') {
+                this.push('boolPropsArr', { name: currentPropName, desc: currentPropDesc });
+              } else if (currentPropType === 'Number') {
+                this.push('numPropsArr', { name: currentPropName, desc: currentPropDesc });
+              } else if (currentPropName === 'icon') {
+                this.push('iconPropsArr', { name: currentPropName, desc: currentPropDesc });
+              } else {
+                this.push('strPropsArr', { name: currentPropName, desc: currentPropDesc });
+              }
+            }
+          }
+
+          var desc = '';
+          for (i = 0; i < elements.length; i++) {
+            desc += elements[i].desc;
+          }
+          var customPropsRegex = /^`--([\S\s]*?)`/gm;
+          var customProps = desc.match(customPropsRegex);
+          if (customProps) {
+            var currentCustomProp;
+            var currentCustomPropRegex = /[\w\-]+/;
+            var currentCustomPropStr;
+            var colorRegex = /color/;
+            for (i = 0; i < customProps.length; i++) {
+              currentCustomProp = customProps[i];
+              currentCustomProp = currentCustomProp.match(currentCustomPropRegex);
+              currentCustomPropStr = currentCustomProp[0];
+              if (currentCustomPropStr.match(colorRegex)) {
+                this.push('colorCustomPropsArr', currentCustomPropStr);
+              } else {
+                this.push('customPropsArr', currentCustomPropStr);
+              }
+            }
+          }
+        },
+
+        _getColors: function(val) {
+          var obj = val.value._content;
+          var keys = Object.keys(obj);
+          var content = obj[keys[0]];
+          var colors = content.match(/--paper([\S\s]*?);/g);
+          var currentColor;
+          var currentColorVal;
+          for (var i = 0; i < colors.length; i++) {
+            currentColor = colors[i].match(/--paper-\w+-\w+(-\w+)?/)[0];
+            currentColorVal = colors[i].match(/#\w+/);
+            this.push('colorsArr', { name: currentColor, value: currentColorVal });
+          }
+        },
+
+        _toggleAttr: function(e) {
+          Polymer.dom(this).querySelector('.el').toggleAttribute(this._decamelize(e.model.item.name, '-'));
+          this._cleanCodeOutput();
+        },
+
+        _setAttr: function(e) {
+          Polymer.dom(this).querySelector('.el').setAttribute(this._decamelize(e.model.item.name, '-'), e.target.value);
+          this._cleanCodeOutput();
+        },
+
+        _setIcon: function(e) {
+          Polymer.dom(this).querySelector('.el').setAttribute('icon', e.detail.item.childNodes[2].icon);
+          this._cleanCodeOutput();
+        },
+
+        _cleanCodeOutput: function() {
+          this.code = Polymer.dom(this).innerHTML.replace(/ class="([\S\s]*?)"| role="([\S\s]*?)"| tabindex="([\S\s]*?)"| value="([\S\s]*?)"| style="([\S\s]*?)"| toggles|=""| aria-\w+="([\S\s]*?)"/g, '');
+        },
+
+        _updateCustomProp: function(e) {
+          var prop = e.model.item;
+          var propVal = e.target.value;
+          var node = '.el';
+          Polymer.dom(this).querySelector(node).customStyle[prop] = propVal;
+          Polymer.dom(this).querySelector(node).updateStyles();
+          var found = false;
+          if (this.customPropsCodeArr.length === 0) {
+            this.push('customPropsCodeArr', { name: prop, value: propVal });
+          } else {
+            for (var i = 0; i < this.customPropsCodeArr.length; i++) {
+              if (this.customPropsCodeArr[i].name === prop) {
+                this.splice('customPropsCodeArr', i, 1, { name: prop, value: propVal });
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              this.push('customPropsCodeArr', { name: prop, value: propVal });
+            }
+          }
+        },
+
+        _updateColorCustomProp: function(e) {
+          var prop = e.model.item;
+          var propVal = 'var(' + e.target.selectedItem.innerHTML.trim() + ')';
+          var node = '.el';
+          Polymer.dom(this).querySelector(node).customStyle[prop] = propVal;
+          Polymer.dom(this).querySelector(node).updateStyles();
+          var found = false;
+          if (this.customPropsCodeArr.length === 0) {
+            this.push('customPropsCodeArr', { name: prop, value: propVal });
+          } else {
+            for (var i = 0; i < this.customPropsCodeArr.length; i++) {
+              if (this.customPropsCodeArr[i].name === prop) {
+                this.splice('customPropsCodeArr', i, 1, { name: prop, value: propVal });
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              this.push('customPropsCodeArr', { name: prop, value: propVal });
+            }
+          }
+        },
+
+        // https://github.com/sindresorhus/decamelize
+        // https://github.com/sindresorhus/decamelize/blob/master/license
+        _decamelize: function(str, sep) {
+          if (typeof str !== 'string') {
+            throw new TypeError('Expected a string');
+          }
+          sep = typeof sep === 'undefined' ? '_' : sep;
+          return str.replace(/([a-z\d])([A-Z])/g, '$1' + sep + '$2')
+          .replace(new RegExp('(' + sep + '[A-Z])([A-Z])', 'g'), '$1' + sep + '$2')
+          .toLowerCase();
+        },
+
+        _getIconNames: function(iconset) {
+          return iconset.getIconNames();
+        },
+
+        _openDialog: function() {
+          this.$.dialog.open();
+        },
+
+        _dropdownItemBackgroundColor: function(color) {
+          return 'background-color:' + color;
+        },
+
+        _removeElement: function() {
+          Polymer.dom(this.parentNode.root).querySelector('#toast-remove').setAttribute('text', this.element + ' has been removed');
+          Polymer.dom(this.parentNode.root).querySelector('#toast-remove').show();
+          Polymer.dom(this.parentNode).removeChild(this);
+        }
+      });
+    }());
+  </script>
+</dom-module>

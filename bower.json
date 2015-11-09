@@ -1,0 +1,28 @@
+{
+  "name": "polymerizr",
+  "description": "Polymer elements WYSIWYG editor",
+  "main": "index.html",
+  "authors": [
+    "Charbel Rami"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "polymer",
+    "editor",
+    "elements",
+    "custom-elements",
+    "web-components"
+  ],
+  "homepage": "https://github.com/charbelrami/polymerizr.git",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "iron-elements": "PolymerElements/iron-elements#~1.0.4",
+    "paper-elements": "PolymerElements/paper-elements#~1.0.5"
+  }
+}

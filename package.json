@@ -1,0 +1,26 @@
+{
+  "name": "polymerizr",
+  "version": "0.1.0",
+  "description": "Polymer elements WYSIWYG editor",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charbelrami/polymerizr.git"
+  },
+  "keywords": [
+    "polymer",
+    "editor",
+    "elements",
+    "custom-elements",
+    "web-components"
+  ],
+  "author": "Charbel Rami",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/charbelrami/polymerizr/issues"
+  },
+  "homepage": "https://github.com/charbelrami/polymerizr#readme"
+}

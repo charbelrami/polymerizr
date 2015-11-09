@@ -1,0 +1,87 @@
+<!--
+@license
+Copyright (c) 2015 Charbel Rami. All rights reserved.
+MIT
+-->
+<dom-module id="element-selector">
+  <template>
+    <style>
+      :host {
+        @apply(--paper-font-common-base);
+      }
+      paper-toast {
+        left: auto;
+        right: 24px;
+        z-index: 1;
+      }
+      paper-dropdown-menu {
+        --paper-input-container-label: {
+          @apply(--paper-font-body2);
+          color: var(--paper-grey-900);
+        }
+      }
+    </style>
+    <iron-ajax url="bower_components/paper-elements/bower.json" handle-as="json" last-response="{{paperElements}}" auto></iron-ajax>
+
+    <paper-dropdown-menu is="iron-input" label="Elements" selected-item-label="{{element}}">
+      <paper-menu class="dropdown-content">
+        <template is="dom-repeat" items="{{elements}}">
+          <paper-item>{{item}}</paper-item>
+        </template>
+      </paper-menu>
+    </paper-dropdown-menu>
+
+    <content></content>
+
+    <paper-toast id="toast-append"></paper-toast>
+    <paper-toast id="toast-remove"></paper-toast>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'element-selector',
+
+        properties: {
+          element: {
+            type: String,
+            observer: '_appendElement'
+          },
+          elements: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          }
+        },
+
+        observers: [
+          '_getData(paperElements.*)'
+        ],
+
+        _getData: function(val) {
+          this.elements = Object.keys(val.value.dependencies);
+          var notSupportedElements = ['paper-behaviors', 'paper-dialog-behavior', 'paper-drawer-panel', 'paper-styles', 'paper-scroll-header-panel'];
+          for (var i = 0; i < notSupportedElements.length; i++) {
+            var j = this.elements.indexOf(notSupportedElements[i]);
+            this.splice('elements', j, 1);
+          }
+        },
+
+        _appendElement: function() {
+          if (this.element) {
+            var elementEditor = document.createElement('element-editor');
+            elementEditor.setAttribute('element', this.element);
+            elementEditor.setAttribute('path', 'bower_components/' + this.element + '/' + this.element + '.html');
+            Polymer.dom(this).appendChild(elementEditor);
+            this.$['toast-append'].setAttribute('text', this.element + ' has been appended');
+            this.$['toast-append'].show();
+            this.$$('paper-menu').select(null);
+          }
+        }
+      });
+
+    }());
+  </script>
+</dom-module>
