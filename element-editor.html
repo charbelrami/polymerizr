@@ -197,6 +197,9 @@ MIT
           var el = document.createElement(this.element);
           el.classList.add('el');
           Polymer.dom(this).appendChild(el);
+          if (this.element === 'paper-button' || this.element === 'paper-checkbox' || this.element === 'paper-item' || this.element === 'paper-material' || this.element === 'paper-radio-button') {
+            Polymer.dom(el).textContent = 'Polymer';
+          }
           this._cleanCodeOutput();
         },
 
