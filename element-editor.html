@@ -199,6 +199,40 @@ MIT
           Polymer.dom(this).appendChild(el);
           if (this.element === 'paper-button' || this.element === 'paper-checkbox' || this.element === 'paper-item' || this.element === 'paper-material' || this.element === 'paper-radio-button') {
             Polymer.dom(el).textContent = 'Polymer';
+          } else if (this.element === 'paper-card') {
+            Polymer.dom(el).innerHTML = '\n  <div class="card-content">Some content</div>' +
+            '\n  <div class="card-actions">' +
+            '\n    <paper-button>Some action</paper-button>' +
+            '\n  </div>\n';
+          } else if (this.element === 'paper-dropdown-menu') {
+            Polymer.dom(el).innerHTML = '\n  <paper-menu class="dropdown-content">' +
+            '\n    <paper-item>Croissant</paper-item>' +
+            '\n    <paper-item>Donut</paper-item>' +
+            '\n    <paper-item>Financier</paper-item>' +
+            '\n    <paper-item>Madeleine</paper-item>' +
+            '\n  </paper-menu>\n';
+          } else if (this.element === 'paper-header-panel') {
+            Polymer.dom(el).innerHTML = '\n  <paper-toolbar>' +
+            '\n    <div>Hello World!</div>' +
+            '\n  </paper-toolbar>\n';
+          } else if (this.element === 'paper-menu' || this.element === 'paper-listbox') {
+            Polymer.dom(el).innerHTML = '\n  <paper-item>Item 1</paper-item>' +
+            '\n  <paper-item>Item 2</paper-item>\n';
+          } else if (this.element === 'paper-menu-button') {
+            Polymer.dom(el).innerHTML = '\n  <paper-icon-button icon="menu" class="dropdown-trigger"></paper-icon-button>' +
+            '\n  <paper-menu class="dropdown-content">' +
+            '\n    <paper-item>Share</paper-item>' +
+            '\n    <paper-item>Settings</paper-item>' +
+            '\n    <paper-item>Help</paper-item>' +
+            '\n  </paper-menu>\n';
+          } else if (this.element === 'paper-tabs') {
+            Polymer.dom(el).innerHTML = '\n  <paper-tab>TAB 1</paper-tab>' +
+            '\n  <paper-tab>TAB 2</paper-tab>' +
+            '\n  <paper-tab>TAB 3</paper-tab>\n';
+          } else if (this.element === 'paper-toolbar') {
+            Polymer.dom(el).innerHTML = '\n  <paper-icon-button icon="menu" on-tap="menuAction"></paper-icon-button>' +
+            '\n  <div class="title">Title</div>' +
+            '\n  <paper-icon-button icon="more-vert" on-tap="moreAction"></paper-icon-button>\n';
           }
           this._cleanCodeOutput();
         },
