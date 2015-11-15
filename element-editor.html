@@ -302,7 +302,15 @@ MIT
         },
 
         _toggleAttr: function(e) {
-          Polymer.dom(this).querySelector('.el').toggleAttribute(this._decamelize(e.model.item.name, '-'));
+          var node = Polymer.dom(this).querySelector('.el');
+          node.toggleAttribute(this._decamelize(e.model.item.name, '-'));
+          if (e.model.item.name === 'raised') {
+            if (!node.hasAttribute('raised')) {
+              node.removeAttribute('elevation');
+            } else {
+              node.setAttribute('elevation', 1);
+            }
+          }
           this._cleanCodeOutput();
         },
 
@@ -312,7 +320,7 @@ MIT
         },
 
         _setIcon: function(e) {
-          Polymer.dom(this).querySelector('.el').setAttribute('icon', e.detail.item.childNodes[2].icon);
+          Polymer.dom(this).querySelector('.el').setAttribute('icon', e.detail.item.childNodes[2].textContent);
           this._cleanCodeOutput();
         },
 
