@@ -10,6 +10,7 @@ MIT
         display: block;
         padding: 8px 5vw;
         background-color: var(--host-background-color);
+        color: var(--host-text-color);
       }
       paper-dialog {
         position: fixed;
@@ -55,9 +56,17 @@ MIT
     <paper-dialog id="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
       <h2>{{element}}</h2>
       <paper-dialog-scrollable>
-        <h3>Host background color</h3>
+        <h3>Host</h3>
         <paper-dropdown-menu label="Host background color">
           <paper-menu on-iron-select="_updateHostBackgroundColor" class="dropdown-content">
+            <template is="dom-repeat" items="{{colorsArr}}" as="color">
+              <paper-item style$="{{_dropdownItemBackgroundColor(color.value)}}">{{color.name}}</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
+
+        <paper-dropdown-menu label="Host text color">
+          <paper-menu on-iron-select="_updateHostTextColor" class="dropdown-content">
             <template is="dom-repeat" items="{{colorsArr}}" as="color">
               <paper-item style$="{{_dropdownItemBackgroundColor(color.value)}}">{{color.name}}</paper-item>
             </template>
@@ -384,8 +393,13 @@ MIT
           }
         },
 
-        _updateHostBackgroundColor: function (e) {
+        _updateHostBackgroundColor: function(e) {
           this.customStyle['--host-background-color'] = 'var(' + e.target.selectedItem.innerHTML.trim() + ')';
+          this.updateStyles();
+        },
+
+        _updateHostTextColor: function(e) {
+          this.customStyle['--host-text-color'] = 'var(' + e.target.selectedItem.innerHTML.trim() + ')';
           this.updateStyles();
         },
 
