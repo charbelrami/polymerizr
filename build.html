@@ -5,14 +5,6 @@ MIT
 --><!--
 @license
 Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE
-The complete set of authors may be found at http://polymer.github.io/AUTHORS
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS
---><!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
 The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
 The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
@@ -37849,30 +37841,52 @@ if (!window.Promise) {
   ];
 
 </script>
+
+
 <style is="custom-style">
 
   :root {
+    /*
+     * Light background theme
+     */
+    --light-theme-background-color: #ffffff;
+    --light-theme-base-color: #000000;
+    --light-theme-text-color: #212121;
+    --light-theme-secondary-color: #737373;  /* for secondary text and icons */
+    --light-theme-disabled-color: #9b9b9b;  /* disabled/hint text */
+    --light-theme-divider-color: #dbdbdb;
 
-    --dark-primary-color: #303f9f;
+    /*
+     * Dark background theme
+     */
+    --dark-theme-background-color: #212121;
+    --dark-theme-base-color: #ffffff;
+    --dark-theme-text-color: #ffffff;
+    --dark-theme-secondary-color: #bcbcbc;  /* for secondary text and icons */
+    --dark-theme-disabled-color: #646464;  /* disabled/hint text */
+    --dark-theme-divider-color: #3c3c3c;
 
-    --default-primary-color: #3f51b5;
+    /*
+     * Primary and accent colors. Also see color.html for more colors.
+     */
+    --primary-color: #3f51b5;  /* --paper-indigo-500 */
+    --light-primary-color: #c5cae9;  /* --paper-indigo-100 */
+    --dark-primary-color: #303f9f;  /* --paper-indigo-700 */
 
-    --light-primary-color: #c5cae9;
+    --accent-color: #ff4081;  /* --paper-pink-a200 */
+    --light-accent-color: #ff80ab;  /* --paper-pink-a100 */
+    --dark-accent-color: #f50057;  /* --paper-pink-a400 */
 
-    --text-primary-color: #ffffff;
-
-    --accent-color: #ff4081;
-
-    --primary-background-color: #ffffff;
-
-    --primary-text-color: #212121;
-
-    --secondary-text-color: #757575;
-
-    --disabled-text-color: #bdbdbd;
-
-    --divider-color: #e0e0e0;
-
+    /*
+     * Deprecated values because of their confusing names.
+     */
+    --primary-text-color: var(--light-theme-text-color);
+    --text-primary-color: var(--dark-theme-text-color);
+    --primary-background-color: var(--light-theme-background-color);
+    --secondary-text-color: var(--light-theme-secondary-color);
+    --disabled-text-color:var(--light-theme-disabled-color);
+    --divider-color: var(--light-theme-divider-color);
+    --default-primary-color: var(--primary-color);
   }
 
 </style>
@@ -37883,11 +37897,6 @@ if (!window.Promise) {
   :root {
 
     /* Shared Styles */
-
-    /*
-    Unfortunately, we can't use nested rules
-    See https://github.com/Polymer/polymer/issues/1399
-    */
     --paper-font-common-base: {
       font-family: 'Roboto', 'Noto', sans-serif;
       -webkit-font-smoothing: antialiased;
@@ -37911,14 +37920,8 @@ if (!window.Promise) {
     /* Material Font Styles */
 
     --paper-font-display4: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-
-      /* @apply(--paper-font-common-nowrap); */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
 
       font-size: 112px;
       font-weight: 300;
@@ -37927,14 +37930,8 @@ if (!window.Promise) {
     };
 
     --paper-font-display3: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-
-      /* @apply(--paper-font-common-nowrap); */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
 
       font-size: 56px;
       font-weight: 400;
@@ -37943,10 +37940,7 @@ if (!window.Promise) {
     };
 
     --paper-font-display2: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-
+      @apply(--paper-font-common-base);
 
       font-size: 45px;
       font-weight: 400;
@@ -37955,10 +37949,7 @@ if (!window.Promise) {
     };
 
     --paper-font-display1: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-
+      @apply(--paper-font-common-base);
 
       font-size: 34px;
       font-weight: 400;
@@ -37967,10 +37958,7 @@ if (!window.Promise) {
     };
 
     --paper-font-headline: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-
+      @apply(--paper-font-common-base);
 
       font-size: 24px;
       font-weight: 400;
@@ -37979,14 +37967,8 @@ if (!window.Promise) {
     };
 
     --paper-font-title: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-
-      /* @apply(--paper-font-common-nowrap); */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
 
       font-size: 20px;
       font-weight: 500;
@@ -37994,10 +37976,7 @@ if (!window.Promise) {
     };
 
     --paper-font-subhead: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-
+      @apply(--paper-font-common-base);
 
       font-size: 16px;
       font-weight: 400;
@@ -38005,9 +37984,7 @@ if (!window.Promise) {
     };
 
     --paper-font-body2: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
+      @apply(--paper-font-common-base);
 
       font-size: 14px;
       font-weight: 500;
@@ -38015,9 +37992,7 @@ if (!window.Promise) {
     };
 
     --paper-font-body1: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
+      @apply(--paper-font-common-base);
 
       font-size: 14px;
       font-weight: 400;
@@ -38025,13 +38000,8 @@ if (!window.Promise) {
     };
 
     --paper-font-caption: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      /* @apply(--paper-font-common-nowrap); */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
 
       font-size: 12px;
       font-weight: 400;
@@ -38040,14 +38010,8 @@ if (!window.Promise) {
     };
 
     --paper-font-menu: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-
-      /* @apply(--paper-font-common-nowrap); */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
 
       font-size: 13px;
       font-weight: 500;
@@ -38055,14 +38019,8 @@ if (!window.Promise) {
     };
 
     --paper-font-button: {
-      /* @apply(--paper-font-common-base) */
-      font-family: 'Roboto', 'Noto', sans-serif;
-      -webkit-font-smoothing: antialiased;
-
-      /* @apply(--paper-font-common-nowrap); */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
 
       font-size: 14px;
       font-weight: 500;
@@ -38072,9 +38030,7 @@ if (!window.Promise) {
     };
 
     --paper-font-code2: {
-      /* @apply(--paper-font-common-code); */
-      font-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
-      -webkit-font-smoothing: antialiased;
+      @apply(--paper-font-common-code);
 
       font-size: 14px;
       font-weight: 700;
@@ -38082,9 +38038,7 @@ if (!window.Promise) {
     };
 
     --paper-font-code1: {
-      /* @apply(--paper-font-common-code); */
-      font-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
-      -webkit-font-smoothing: antialiased;
+      @apply(--paper-font-common-code);
 
       font-size: 14px;
       font-weight: 500;
@@ -38787,7 +38741,7 @@ if (!window.Promise) {
 
       // Ignore the event if this is coming from a focused light child, since that
       // element will deal with it.
-      if (this.isLightDescendant(target))
+      if (this.isLightDescendant(/** @type {Node} */(target)))
         return;
 
       keyboardEvent.preventDefault();
@@ -38804,7 +38758,7 @@ if (!window.Promise) {
 
       // Ignore the event if this is coming from a focused light child, since that
       // element will deal with it.
-      if (this.isLightDescendant(target))
+      if (this.isLightDescendant(/** @type {Node} */(target)))
         return;
 
       if (this.pressed) {
@@ -39657,6 +39611,7 @@ if (!window.Promise) {
 
     /**
      * Returns false if the element is required and not checked, and true otherwise.
+     * @param {*=} _value Ignored.
      * @return {boolean} true if `required` is false, or if `required` and `checked` are both true.
      */
     _getValidity: function(_value) {
@@ -40269,7 +40224,6 @@ context. You should place this element as a child of `<body>` whenever possible.
     },
 
     listeners: {
-      'tap': '_onClick',
       'iron-resize': '_onIronResize'
     },
 
@@ -40291,6 +40245,10 @@ context. You should place this element as a child of `<body>` whenever possible.
 
     ready: function() {
       this._ensureSetup();
+    },
+
+    attached: function() {
+      // Call _openedChanged here so that position can be computed correctly.
       if (this._callOpenedWhenReady) {
         this._openedChanged();
       }
@@ -40522,20 +40480,10 @@ context. You should place this element as a child of `<body>` whenever possible.
     },
 
     _onCaptureClick: function(event) {
-      // attempt to close asynchronously and prevent the close of a tap event is immediately heard
-      // on target. This is because in shadow dom due to event retargetting event.target is not
-      // useful.
-      if (!this.noCancelOnOutsideClick && (this._manager.currentOverlay() == this)) {
-        this._cancelJob = this.async(function() {
-          this.cancel();
-        }, 10);
-      }
-    },
-
-    _onClick: function(event) {
-      if (this._cancelJob) {
-        this.cancelAsync(this._cancelJob);
-        this._cancelJob = null;
+      if (!this.noCancelOnOutsideClick &&
+          this._manager.currentOverlay() === this &&
+          Polymer.dom(event).path.indexOf(this) === -1) {
+        this.cancel();
       }
     },
 
@@ -40544,6 +40492,7 @@ context. You should place this element as a child of `<body>` whenever possible.
       if (!this.noCancelOnEscKey && (event.keyCode === ESC)) {
         this.cancel();
         event.stopPropagation();
+        event.stopImmediatePropagation();
       }
     },
 
@@ -41318,7 +41267,6 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
 </script>
 <script>
-
   /**
    * Use `Polymer.PaperInputBehavior` to implement inputs with `<paper-input-container>`. This
    * behavior is implemented by `<paper-input>`. It exposes a number of properties from
@@ -41330,7 +41278,6 @@ is separate from validation, and `allowed-pattern` does not affect how the input
    * @polymerBehavior Polymer.PaperInputBehavior
    */
   Polymer.PaperInputBehaviorImpl = {
-
     properties: {
       /**
        * Fired when the input changes due to user interaction.
@@ -41714,6 +41661,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         this._shiftTabPressed = false;
       }, 1);
     },
+
     /**
      * If `autoValidate` is true, then validates the element.
      */
@@ -41794,7 +41742,6 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         });
       }
     }
-
   };
 
   /** @polymerBehavior */
@@ -41803,7 +41750,6 @@ is separate from validation, and `allowed-pattern` does not affect how the input
     Polymer.IronA11yKeysBehavior,
     Polymer.PaperInputBehaviorImpl
   ];
-
 </script>
 <script>
 
@@ -41845,6 +41791,9 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
 
 
+
+
+
 <script>
   (function() {
     'use strict';
@@ -41875,6 +41824,10 @@ is separate from validation, and `allowed-pattern` does not affect how the input
        */
       elementIsScrollLocked: function(element) {
         var currentLockingElement = this.currentLockingElement;
+
+        if (currentLockingElement === undefined)
+          return false;
+
         var scrollLocked;
 
         if (this._hasCachedLockedElement(element)) {
@@ -42179,11 +42132,10 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
   /** @polymerBehavior */
   Polymer.PaperItemBehavior = [
-    Polymer.IronControlState,
     Polymer.IronButtonState,
+    Polymer.IronControlState,
     Polymer.PaperItemBehaviorImpl
   ];
-
 </script>
 
 
@@ -43422,7 +43374,7 @@ styles. All other styles should exist as single lines."
 
 .paper-font-code1 {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 20px;
 }
 
@@ -44907,16 +44859,12 @@ styles. All other styles should exist as single lines."
     })
   </script>
 </dom-module>
-<dom-module id="paper-material" assetpath="bower_components/paper-material/">
+<dom-module id="paper-material-shared-styles" assetpath="bower_components/paper-material/">
   <template>
     <style>
       :host {
         display: block;
         position: relative;
-      }
-
-      :host([animated]) {
-        @apply(--shadow-transition);
       }
 
       :host([elevation="1"]) {
@@ -44937,6 +44885,16 @@ styles. All other styles should exist as single lines."
 
       :host([elevation="5"]) {
         @apply(--shadow-elevation-16dp);
+      }
+    </style>
+  </template>
+</dom-module>
+<dom-module id="paper-material" assetpath="bower_components/paper-material/">
+  <template>
+    <style include="paper-material-shared-styles"></style>
+    <style>
+      :host([animated]) {
+        @apply(--shadow-transition);
       }
     </style>
 
@@ -45734,7 +45692,7 @@ styles. All other styles should exist as single lines."
 
     _calculateElevation: function() {
       if (!this.raised) {
-        this.elevation = 0;
+        this._setElevation(0);
       } else {
         Polymer.PaperButtonBehaviorImpl._calculateElevation.apply(this);
       }
@@ -46214,6 +46172,7 @@ styles. All other styles should exist as single lines."
         display: inline-block;
         white-space: nowrap;
         cursor: pointer;
+        --calculated-paper-checkbox-size: var(--paper-checkbox-size, 18px);
       }
 
       :host(:focus) {
@@ -46227,26 +46186,29 @@ styles. All other styles should exist as single lines."
       #checkboxContainer {
         display: inline-block;
         position: relative;
-        width: 18px;
-        height: 18px;
-        min-width: 18px;
+        width: var(--calculated-paper-checkbox-size);
+        height: var(--calculated-paper-checkbox-size);
+        min-width: var(--calculated-paper-checkbox-size);
         vertical-align: middle;
         background-color: var(--paper-checkbox-unchecked-background-color, transparent);
       }
 
       #ink {
         position: absolute;
-        top: -15px;
-        left: -15px;
-        width: 48px;
-        height: 48px;
+
+        /* Center the ripple in the checkbox by negative offsetting it by
+         * (inkWidth - rippleWidth) / 2 */
+        top: calc(0px - (2.66 * var(--calculated-paper-checkbox-size) - var(--calculated-paper-checkbox-size)) / 2);
+        left: calc(0px - (2.66 * var(--calculated-paper-checkbox-size) - var(--calculated-paper-checkbox-size)) / 2);
+        width: calc(2.66 * var(--calculated-paper-checkbox-size));
+        height: calc(2.66 * var(--calculated-paper-checkbox-size));
         color: var(--paper-checkbox-unchecked-ink-color, --primary-text-color);
         opacity: 0.6;
         pointer-events: none;
       }
 
       :host-context([dir="rtl"]) #ink {
-        right: -15px;
+        right: calc(0px - (2.66 * var(--calculated-paper-checkbox-size) - var(--calculated-paper-checkbox-size)) / 2);
         left: auto;
       }
 
@@ -46297,16 +46259,21 @@ styles. All other styles should exist as single lines."
 
       #checkmark {
         position: absolute;
-        width: 5px;
-        height: 10px;
+        width: 36%;
+        height: 70%;
         border-style: solid;
         border-top: none;
         border-left: none;
-        border-right-width: 2px;
-        border-bottom-width: 2px;
+        border-right-width: calc(2/15 * var(--calculated-paper-checkbox-size));
+        border-bottom-width: calc(2/15 * var(--calculated-paper-checkbox-size));
         border-color: var(--paper-checkbox-checkmark-color, white);
         transform-origin: 97% 86%;
         -webkit-transform-origin: 97% 86%;
+      }
+
+      :host-context([dir="rtl"]) #checkmark {
+        transform-origin: 50% 14%;
+        -webkit-transform-origin: 50% 14%;
       }
 
       /* label */
@@ -47371,7 +47338,6 @@ styles. All other styles should exist as single lines."
 </dom-module>
 <dom-module id="paper-input-char-counter" assetpath="bower_components/paper-input/">
   <template>
-
     <style>
       :host {
         display: inline-block;
@@ -47387,7 +47353,6 @@ styles. All other styles should exist as single lines."
     </style>
 
     <span>[[_charCounterStr]]</span>
-
   </template>
 </dom-module>
 
@@ -47425,7 +47390,6 @@ styles. All other styles should exist as single lines."
 </script>
 <dom-module id="paper-input-container" assetpath="bower_components/paper-input/">
   <template>
-
     <style>
       :host {
         display: block;
@@ -47454,15 +47418,14 @@ styles. All other styles should exist as single lines."
       }
 
       .focused-line {
-        height: 2px;
         @apply(--layout-fit);
 
+        background: var(--paper-input-container-focus-color, --default-primary-color);
+        height: 2px;
         -webkit-transform-origin: center center;
         transform-origin: center center;
         -webkit-transform: scale3d(0,1,1);
         transform: scale3d(0,1,1);
-
-        background: var(--paper-input-container-focus-color, --default-primary-color);
 
         @apply(--paper-input-container-underline-focus);
       }
@@ -47478,7 +47441,6 @@ styles. All other styles should exist as single lines."
 
       .underline.is-invalid .focused-line {
         background: var(--paper-input-container-invalid-color, --google-red-500);
-
         -webkit-transform: none;
         transform: none;
         -webkit-transition: -webkit-transform 0.25s;
@@ -47488,8 +47450,9 @@ styles. All other styles should exist as single lines."
       }
 
       .unfocused-line {
-        height: 1px;
         @apply(--layout-fit);
+
+        height: 1px;
         background: var(--paper-input-container-color, --secondary-text-color);
 
         @apply(--paper-input-container-underline);
@@ -47509,9 +47472,10 @@ styles. All other styles should exist as single lines."
       }
 
       .input-content {
-        position: relative;
         @apply(--layout-horizontal);
         @apply(--layout-center);
+
+        position: relative;
       }
 
       .input-content ::content label,
@@ -47534,7 +47498,6 @@ styles. All other styles should exist as single lines."
         transform: translateY(-75%) scale(0.75);
         -webkit-transition: -webkit-transform 0.25s;
         transition: transform 0.25s;
-
         -webkit-transform-origin: left top;
         transform-origin: left top;
 
@@ -47543,6 +47506,7 @@ styles. All other styles should exist as single lines."
         width: 133%;
 
         @apply(--paper-transition-easing);
+        @apply(--paper-input-container-label-floating);
       }
 
       :host-context([dir="rtl"]) .input-content.label-is-floating ::content label,
@@ -47633,6 +47597,7 @@ styles. All other styles should exist as single lines."
       <div class="label-and-input-container" id="labelAndInputContainer">
         <content select=":not([add-on]):not([prefix]):not([suffix])"></content>
       </div>
+
       <content select="[suffix]"></content>
     </div>
 
@@ -47644,7 +47609,6 @@ styles. All other styles should exist as single lines."
     <div class$="[[_computeAddOnContentClass(focused,invalid)]]">
       <content id="addOnContent" select="[add-on]"></content>
     </div>
-
   </template>
 </dom-module>
 
@@ -47930,7 +47894,6 @@ styles. All other styles should exist as single lines."
 </script>
 <dom-module id="paper-input-error" assetpath="bower_components/paper-input/">
   <template>
-
     <style>
       :host {
         display: inline-block;
@@ -47951,7 +47914,6 @@ styles. All other styles should exist as single lines."
     </style>
 
     <content></content>
-
   </template>
 </dom-module>
 
@@ -47981,7 +47943,6 @@ styles. All other styles should exist as single lines."
 </script>
 <dom-module id="paper-input" assetpath="bower_components/paper-input/">
   <template>
-
     <style>
       :host {
         display: block;
@@ -48023,7 +47984,6 @@ styles. All other styles should exist as single lines."
       </template>
 
     </paper-input-container>
-
   </template>
 </dom-module>
 
@@ -48094,8 +48054,17 @@ styles. All other styles should exist as single lines."
 
           /**
            * A pixel value that will be added to the position calculated for the
-           * given `horizontalAlign`. Use a negative value to offset to the
-           * left, or a positive value to offset to the right.
+           * given `horizontalAlign`, in the direction of alignment. You can think
+           * of it as increasing or decreasing the distance to the side of the
+           * screen given by `horizontalAlign`.
+           *
+           * If `horizontalAlign` is "left", this offset will increase or decrease
+           * the distance to the left side of the screen: a negative offset will
+           * move the dropdown to the left; a positive one, to the right.
+           *
+           * Conversely if `horizontalAlign` is "right", this offset will increase
+           * or decrease the distance to the right side of the screen: a negative
+           * offset will move the dropdown to the right; a positive one, to the left.
            */
           horizontalOffset: {
             type: Number,
@@ -48105,8 +48074,17 @@ styles. All other styles should exist as single lines."
 
           /**
            * A pixel value that will be added to the position calculated for the
-           * given `verticalAlign`. Use a negative value to offset towards the
-           * top, or a positive value to offset towards the bottom.
+           * given `verticalAlign`, in the direction of alignment. You can think
+           * of it as increasing or decreasing the distance to the side of the
+           * screen given by `verticalAlign`.
+           *
+           * If `verticalAlign` is "top", this offset will increase or decrease
+           * the distance to the top side of the screen: a negative offset will
+           * move the dropdown upwards; a positive one, downwards.
+           *
+           * Conversely if `verticalAlign` is "bottom", this offset will increase
+           * or decrease the distance to the bottom side of the screen: a negative
+           * offset will move the dropdown downwards; a positive one, upwards.
            */
           verticalOffset: {
             type: Number,
@@ -48206,6 +48184,13 @@ styles. All other styles should exist as single lines."
         },
 
         /**
+         * Whether the text direction is RTL
+         */
+        _isRTL: function() {
+          return window.getComputedStyle(this).direction == 'rtl';
+        },
+
+        /**
          * The element that should be used to position the dropdown when
          * it opens, if no position target is configured.
          */
@@ -48236,7 +48221,10 @@ styles. All other styles should exist as single lines."
         get _horizontalAlignTargetValue() {
           var target;
 
-          if (this.horizontalAlign === 'right') {
+          // In RTL, the direction flips, so what is "right" in LTR becomes "left".
+          var isRTL = this._isRTL();
+          if ((!isRTL && this.horizontalAlign === 'right') ||
+              (isRTL && this.horizontalAlign === 'left')) {
             target = document.documentElement.clientWidth - this._positionRect.right;
           } else {
             target = this._positionRect.left;
@@ -48262,6 +48250,18 @@ styles. All other styles should exist as single lines."
           target += this.verticalOffset;
 
           return Math.max(target, 0);
+        },
+
+        /**
+         * The horizontal align value, accounting for the RTL/LTR text direction.
+         */
+        get _localeHorizontalAlign() {
+          // In RTL, "left" becomes "right".
+          if (this._isRTL()) {
+            return this.horizontalAlign === 'right' ? 'left' : 'right';
+          } else {
+            return this.horizontalAlign;
+          }
         },
 
         /**
@@ -48412,7 +48412,7 @@ styles. All other styles should exist as single lines."
             return;
           }
 
-          this.style[this.horizontalAlign] =
+          this.style[this._localeHorizontalAlign] =
             this._horizontalAlignTargetValue + 'px';
 
           this.style[this.verticalAlign] =
@@ -48446,7 +48446,6 @@ styles. All other styles should exist as single lines."
     })();
   </script>
 </dom-module>
-
 <dom-module id="paper-menu-button" assetpath="bower_components/paper-menu-button/">
   <style>
     :host {
@@ -48477,11 +48476,14 @@ styles. All other styles should exist as single lines."
       margin-top: 20px;
     }
 
-    paper-material {
+    iron-dropdown {
+      @apply(--paper-menu-button-dropdown);
+    }
+
+    .dropdown-content {
       border-radius: 2px;
       background-color: var(--paper-menu-button-dropdown-background, --primary-background-color);
-
-      @apply(--paper-menu-button-dropdown);
+      @apply(--paper-menu-button-content);
     }
   </style>
   <template>
@@ -49098,7 +49100,7 @@ styles. All other styles should exist as single lines."
 </dom-module>
 <dom-module id="paper-fab" assetpath="bower_components/paper-fab/">
   <template strip-whitespace="">
-    <style include="paper-material">
+    <style include="paper-material-shared-styles">
       :host {
         display: inline-block;
         position: relative;
@@ -49608,6 +49610,10 @@ styles. All other styles should exist as single lines."
         cursor: auto;
         @apply(--paper-icon-button-disabled);
       }
+      
+      :host(:hover) { 
+        @apply(--paper-icon-button-hover);
+      }
 
       iron-icon {
         --iron-icon-width: 100%;
@@ -49990,7 +49996,6 @@ styles. All other styles should exist as single lines."
       </template>
 
     </paper-input-container>
-
   </template>
 </dom-module>
 
@@ -50057,30 +50062,39 @@ styles. All other styles should exist as single lines."
     <style>
       :host {
         display: block;
+        position: relative;
         min-height: var(--paper-item-min-height, 48px);
         padding: 0px 16px;
       }
 
+      :host([hidden]) {
+        display: none !important;
+      }
+
       :host(.iron-selected) {
         font-weight: var(--paper-item-selected-weight, bold);
+
         @apply(--paper-item-selected);
       }
 
       :host([disabled]) {
         color: var(--paper-item-disabled-color, --disabled-text-color);
+
         @apply(--paper-item-disabled);
       }
 
       :host(:focus) {
         position: relative;
         outline: 0;
+
         @apply(--paper-item-focused);
       }
 
       :host(:focus):before {
         @apply(--layout-fit);
-        content: '';
+
         background: currentColor;
+        content: '';
         opacity: var(--dark-divider-opacity);
         pointer-events: none;
 
@@ -50134,14 +50148,15 @@ styles. All other styles should exist as single lines."
       }
 
       :host > ::content > * {
-        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       :host > ::content [secondary] {
-        color: var(--paper-item-body-secondary-color, --secondary-text-color);
         @apply(--paper-font-body1);
+
+        color: var(--paper-item-body-secondary-color, --secondary-text-color);
 
         @apply(--paper-item-body-secondary);
       }
@@ -50170,9 +50185,10 @@ styles. All other styles should exist as single lines."
       }
 
       .content-icon {
-        width: var(--paper-item-icon-width, 56px);
         @apply(--layout-horizontal);
         @apply(--layout-center);
+
+        width: var(--paper-item-icon-width, 56px);
       }
     </style>
 
@@ -50302,14 +50318,11 @@ styles. All other styles should exist as single lines."
     :host {
       display: block;
       transition-duration: 300ms;
+      overflow: auto;
     }
 
     :host(.iron-collapse-closed) {
       display: none;
-    }
-
-    :host(:not(.iron-collapse-opened)) {
-      overflow: hidden;
     }
 
   </style>
@@ -50351,12 +50364,22 @@ styles. All other styles should exist as single lines."
         value: false,
         notify: true,
         observer: '_openedChanged'
-      }
+      },
+
+      /**
+       * Set noAnimation to true to disable animations
+       *
+       * @attribute noAnimation
+       */
+      noAnimation: {
+        type: Boolean
+      },
 
     },
 
     hostAttributes: {
       role: 'group',
+      'aria-hidden': 'true',
       'aria-expanded': 'false'
     },
 
@@ -50364,10 +50387,9 @@ styles. All other styles should exist as single lines."
       transitionend: '_transitionEnd'
     },
 
-    ready: function() {
-      // Avoid transition at the beginning e.g. page loads and enable
-      // transitions only after the element is rendered and ready.
-      this._enableTransition = true;
+    attached: function() {
+      // It will take care of setting correct classes and styles.
+      this._transitionEnd();
     },
 
     /**
@@ -50380,25 +50402,56 @@ styles. All other styles should exist as single lines."
     },
 
     show: function() {
-      this.opened = true;    
+      this.opened = true;
     },
 
     hide: function() {
-      this.opened = false;    
+      this.opened = false;
     },
 
     updateSize: function(size, animated) {
-      this.enableTransition(animated);
-      var s = this.style;
-      var nochange = s[this.dimension] === size;
-      s[this.dimension] = size;
-      if (animated && nochange) {
-        this._transitionEnd();
+      // No change!
+      if (this.style[this.dimension] === size) {
+        return;
       }
+
+      this._updateTransition(false);
+      // If we can animate, must do some prep work.
+      if (animated && !this.noAnimation) {
+        // Animation will start at the current size.
+        var startSize = this._calcSize();
+        // For `auto` we must calculate what is the final size for the animation.
+        // After the transition is done, _transitionEnd will set the size back to `auto`.
+        if (size === 'auto') {
+          this.style[this.dimension] = size;
+          size = this._calcSize();
+        }
+        // Go to startSize without animation.
+        this.style[this.dimension] = startSize;
+        // Force layout to ensure transition will go. Set offsetHeight to itself
+        // so that compilers won't remove it.
+        this.offsetHeight = this.offsetHeight;
+        // Enable animation.
+        this._updateTransition(true);
+      }
+      // Set the final size.
+      this.style[this.dimension] = size;
     },
 
+    /**
+     * enableTransition() is deprecated, but left over so it doesn't break existing code.
+     * Please use `noAnimation` property instead.
+     *
+     * @method enableTransition
+     * @deprecated since version 1.0.4
+     */
     enableTransition: function(enabled) {
-      this.style.transitionDuration = (enabled && this._enableTransition) ? '' : '0s';
+      console.warn('`enableTransition()` is deprecated, use `noAnimation` instead.');
+      this.noAnimation = !enabled;
+    },
+
+    _updateTransition: function(enabled) {
+      this.style.transitionDuration = (enabled && !this.noAnimation) ? '' : '0s';
     },
 
     _horizontalChanged: function() {
@@ -50407,44 +50460,34 @@ styles. All other styles should exist as single lines."
     },
 
     _openedChanged: function() {
+      this.setAttribute('aria-expanded', this.opened);
+      this.setAttribute('aria-hidden', !this.opened);
+
+      this.toggleClass('iron-collapse-closed', false);
+      this.toggleClass('iron-collapse-opened', false);
+      this.updateSize(this.opened ? 'auto' : '0px', true);
+
+      // Focus the current collapse.
       if (this.opened) {
-        this.setAttribute('aria-expanded', 'true');
-        this.setAttribute('aria-hidden', 'false');
-
-        this.toggleClass('iron-collapse-closed', false);
-        this.updateSize('auto', false);
-        var s = this._calcSize();
-        this.updateSize('0px', false);
-        // force layout to ensure transition will go
-        /** @suppress {suspiciousCode} */ this.offsetHeight;
-        this.updateSize(s, true);
-        // focus the current collapse
         this.focus();
-      } else {
-        this.setAttribute('aria-expanded', 'false');
-        this.setAttribute('aria-hidden', 'true');
-
-        this.toggleClass('iron-collapse-opened', false);
-        this.updateSize(this._calcSize(), false);
-        // force layout to ensure transition will go
-        /** @suppress {suspiciousCode} */ this.offsetHeight;
-        this.updateSize('0px', true);
+      }
+      if (this.noAnimation) {
+        this._transitionEnd();
       }
     },
 
     _transitionEnd: function() {
       if (this.opened) {
-        this.updateSize('auto', false);
+        this.style[this.dimension] = 'auto';
       }
       this.toggleClass('iron-collapse-closed', !this.opened);
       this.toggleClass('iron-collapse-opened', this.opened);
-      this.enableTransition(false);
+      this._updateTransition(false);
     },
 
     _calcSize: function() {
       return this.getBoundingClientRect()[this.dimension] + 'px';
-    },
-
+    }
 
   });
 
@@ -50457,139 +50500,169 @@ styles. All other styles should exist as single lines."
       <content id="trigger" select=".menu-trigger"></content>
     </div>
     <iron-collapse id="collapse" opened="{{opened}}">
-      <content select=".menu-content"></content>
+      <content id="content" select=".menu-content"></content>
     </iron-collapse>
   </template>
 
   <script>
-    (function() {
-      Polymer({
-        is: 'paper-submenu',
 
-        properties: {
-          /**
-           * Fired when the submenu is opened.
-           *
-           * @event paper-submenu-open
-           */
+  (function() {
 
-          /**
-           * Fired when the submenu is closed.
-           *
-           * @event paper-submenu-close
-           */
+    Polymer({
 
-          /**
-           * Set opened to true to show the collapse element and to false to hide it.
-           *
-           * @attribute opened
-           */
-          opened: {
-            type: Boolean,
-            value: false,
-            notify: true,
-            observer: '_openedChanged'
-          }
-        },
+      is: 'paper-submenu',
 
-        behaviors: [
-          Polymer.IronControlState
-        ],
-
-        get __parent() {
-          return Polymer.dom(this).parentNode;
-        },
-
-        get __trigger() {
-          return Polymer.dom(this.$.trigger).getDistributedNodes()[0];
-        },
-
-        attached: function() {
-          this.listen(this.__parent, 'iron-activate', '_onParentIronActivate');
-        },
-
-        dettached: function() {
-          this.unlisten(this.__parent, 'iron-activate', '_onParentIronActivate');
-        },
+      properties: {
+        /**
+         * Fired when the submenu is opened.
+         *
+         * @event paper-submenu-open
+         */
 
         /**
-         * Expand the submenu content.
+         * Fired when the submenu is closed.
+         *
+         * @event paper-submenu-close
          */
-        open: function() {
-          if (this.disabled)
-            return;
+
+        /**
+         * Set opened to true to show the collapse element and to false to hide it.
+         *
+         * @attribute opened
+         */
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          observer: '_openedChanged'
+        }
+      },
+
+      behaviors: [
+        Polymer.IronControlState
+      ],
+
+      listeners: {
+        'focus': '_onFocus'
+      },
+
+      get __parent() {
+        return Polymer.dom(this).parentNode;
+      },
+
+      get __trigger() {
+        return Polymer.dom(this.$.trigger).getDistributedNodes()[0];
+      },
+
+      get __content() {
+        return Polymer.dom(this.$.content).getDistributedNodes()[0];
+      },
+
+      attached: function() {
+        this.listen(this.__parent, 'iron-activate', '_onParentIronActivate');
+      },
+
+      dettached: function() {
+        this.unlisten(this.__parent, 'iron-activate', '_onParentIronActivate');
+      },
+
+      /**
+       * Expand the submenu content.
+       */
+      open: function() {
+        if (!this.disabled && !this._active) {
           this.$.collapse.show();
           this._active = true;
-          this.__trigger.classList.add('iron-selected');
-        },
+          this.__trigger && this.__trigger.classList.add('iron-selected');
+          this.__content && this.__content.focus();
+        }
+      },
 
-        /**
-         * Collapse the submenu content.
-         */
-        close: function() {
+      /**
+       * Collapse the submenu content.
+       */
+      close: function() {
+        if (this._active) {
           this.$.collapse.hide();
           this._active = false;
-          this.__trigger.classList.remove('iron-selected');
-        },
+          this.__trigger && this.__trigger.classList.remove('iron-selected');
+        }
+      },
 
-        /**
-         * A handler that is called when the trigger is tapped.
-         */
-        _onTap: function() {
-          if (this.disabled)
-            return;
-          this.$.collapse.toggle();
-        },
+      /**
+       * Toggle the submenu.
+       */
+      toggle: function() {
+        if (this._active) {
+          this.close();
+        } else {
+          this.open();
+        }
+      },
 
-        /**
-         * Toggles the submenu content when the trigger is tapped.
-         */
-        _openedChanged: function(opened, oldOpened) {
-          if (opened) {
-            this.fire('paper-submenu-open');
-          } else if (oldOpened != null) {
-            this.fire('paper-submenu-close');
-          }
-        },
+      /**
+       * A handler that is called when the trigger is tapped.
+       */
+      _onTap: function(e) {
+        if (!this.disabled) {
+          this.toggle();
+        }
+      },
 
-        /**
-         * A handler that is called when `iron-activate` is fired.
-         *
-         * @param {CustomEvent} event An `iron-activate` event.
-         */
-        _onParentIronActivate: function(event) {
-          if (Polymer.Gestures.findOriginalTarget(event) !== this.__parent) {
-            return;
-          }
+      /**
+       * Toggles the submenu content when the trigger is tapped.
+       */
+      _openedChanged: function(opened, oldOpened) {
+        if (opened) {
+          this.fire('paper-submenu-open');
+        } else if (oldOpened != null) {
+          this.fire('paper-submenu-close');
+        }
+      },
 
+      /**
+       * A handler that is called when `iron-activate` is fired.
+       *
+       * @param {CustomEvent} event An `iron-activate` event.
+       */
+      _onParentIronActivate: function(event) {
+        var parent = this.__parent;
+        if (Polymer.dom(event).localTarget === parent) {
           // The activated item can either be this submenu, in which case it
           // should be expanded, or any of the other sibling submenus, in which
           // case this submenu should be collapsed.
-          if (event.detail.item == this) {
-            if (this._active)
-              return;
-            this.open();
-          } else {
+          if (event.detail.item !== this && !parent.multi) {
             this.close();
-          }
-        },
-
-        /**
-         * If the dropdown is open when disabled becomes true, close the
-         * dropdown.
-         *
-         * @param {boolean} disabled True if disabled, otherwise false.
-         */
-        _disabledChanged: function(disabled) {
-          Polymer.IronControlState._disabledChanged.apply(this, arguments);
-          if (disabled && this._active) {
-            this.close();
-
           }
         }
-      });
-    })();
-  </script>
+      },
+
+      /**
+       * If the dropdown is open when disabled becomes true, close the
+       * dropdown.
+       *
+       * @param {boolean} disabled True if disabled, otherwise false.
+       */
+      _disabledChanged: function(disabled) {
+        Polymer.IronControlState._disabledChanged.apply(this, arguments);
+        if (disabled && this._active) {
+          this.close();
+        }
+      },
+
+      /**
+       * Handler that is called when the menu receives focus.
+       *
+       * @param {FocusEvent} event A focus event.
+       */
+      _onFocus: function(event) {
+        this.__trigger && this.__trigger.focus();
+      }
+
+    });
+
+  })();
+</script>
 </dom-module>
 <dom-module id="paper-progress" assetpath="bower_components/paper-progress/">
   <style>
@@ -51138,7 +51211,7 @@ styles. All other styles should exist as single lines."
         newIndex = (newIndex - 1 + length) % length;
       } while (this.items[newIndex].disabled)
 
-      this.select(this._indexToValue(newIndex));
+      this._itemActivate(this._indexToValue(newIndex), this.items[newIndex]);
     },
 
     /**
@@ -51153,7 +51226,7 @@ styles. All other styles should exist as single lines."
         newIndex = (newIndex + 1 + length) % length;
       } while (this.items[newIndex].disabled)
 
-      this.select(this._indexToValue(newIndex));
+      this._itemActivate(this._indexToValue(newIndex), this.items[newIndex]);
     },
   });
 </script>
@@ -51352,16 +51425,6 @@ styles. All other styles should exist as single lines."
         value: 0
       },
 
-      _prevScrollTop: {
-        type: Number,
-        value: 0
-      },
-
-      _y: {
-        type: Number,
-        value: 0
-      },
-
       /** @type {number|null} */
       _defaultCondsensedHeaderHeight: {
         type: Number,
@@ -51381,9 +51444,12 @@ styles. All other styles should exist as single lines."
     },
 
     ready: function() {
-      this.async(this.measureHeaderHeight, 5);
       this._scrollHandler = this._scroll.bind(this);
       this.scroller.addEventListener('scroll', this._scrollHandler);
+    },
+
+    attached: function() {
+      this.async(this.measureHeaderHeight, 1);
     },
 
     /**
@@ -51627,9 +51693,13 @@ styles. All other styles should exist as single lines."
 
       if (y > this._headerMaxDelta) {
         y = this._headerMaxDelta;
-        this._setHeaderState(ctx.HEADER_STATE_HIDDEN);
 
-      } else if (this.condenses && this._prevScrollTop >= scrollTop && scrollTop >= this._headerMargin) {
+        if (this.keepCondensedHeader) {
+          this._setHeaderState(ctx.HEADER_STATE_CONDENSED);
+        } else {
+          this._setHeaderState(ctx.HEADER_STATE_HIDDEN);
+        }
+      } else if (this.condenses && scrollTop >= this._headerMargin) {
         y = Math.max(y, this._headerMargin);
         this._setHeaderState(ctx.HEADER_STATE_CONDENSED);
 
@@ -53098,6 +53168,8 @@ styles. All other styles should exist as single lines."
         } else if (alignBottom) {
           return 'align-bottom';
         }
+
+        return '';
       },
 
       // TODO(cdata): Add `track` response back in when gesture lands.
@@ -53634,7 +53706,7 @@ styles. All other styles should exist as single lines."
         top: -2px;
         display: inline-block;
         vertical-align: middle;
-        margin-left: 10px;
+        padding-left: var(--paper-toggle-button-label-spacing, 8px);
         white-space: normal;
         pointer-events: none;
         color: var(--paper-toggle-button-label-color, --primary-text-color);
@@ -54438,6 +54510,10 @@ styles. All other styles should exist as single lines."
 
     <hydrolysis-analyzer src="bower_components/paper-styles/color.html" analyzer="{{colorsAnalysis}}"></hydrolysis-analyzer>
 
+    <hydrolysis-analyzer src="bower_components/paper-styles/typography.html" analyzer="{{typographyAnalysis}}"></hydrolysis-analyzer>
+
+    <hydrolysis-analyzer src="bower_components/paper-styles/shadow.html" analyzer="{{shadowAnalysis}}"></hydrolysis-analyzer>
+
     <iron-meta type="iconset" list="{{iconsets}}"></iron-meta>
 
     <paper-dialog id="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
@@ -54502,19 +54578,44 @@ styles. All other styles should exist as single lines."
         <h3>Style</h3>
         <template is="dom-repeat" items="{{customPropsArr}}">
           <div>
-            <paper-input on-input="_updateCustomProp" label="{{item}}" type="text"></paper-input>
+            <paper-input on-input="_updateCustomProp" label="{{item.name}}" type="text"></paper-input>
+            <small>{{item.desc}}</small>
           </div>
         </template>
 
         <h4>Colors</h4>
         <template is="dom-repeat" items="{{colorCustomPropsArr}}">
-          <paper-dropdown-menu label="{{item}}">
+          <paper-dropdown-menu label="{{item.name}}">
             <paper-menu on-iron-select="_updateColorCustomProp" class="dropdown-content">
               <template is="dom-repeat" items="{{colorsArr}}" as="color">
                 <paper-item style$="{{_dropdownItemBackgroundColor(color.value)}}">{{color.name}}</paper-item>
               </template>
             </paper-menu>
           </paper-dropdown-menu>
+          <small>{{item.desc}}</small>
+        </template>
+
+        <h4>Mixins</h4>
+        <template is="dom-repeat" items="{{mixinCustomPropsArr}}">
+          <h5>{{item.name}}</h5>
+          <paper-dropdown-menu label="Typography mixins">
+            <paper-menu on-iron-select="_updateTypographyMixinCustomProp" class="dropdown-content">
+              <template is="dom-repeat" items="{{typographyArr}}" as="typography">
+                <paper-item>{{typography}}</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+          <paper-dropdown-menu label="Shadow mixins">
+            <paper-menu on-iron-select="_updateShadowMixinCustomProp" class="dropdown-content">
+              <template is="dom-repeat" items="{{shadowArr}}" as="shadow">
+                <paper-item>{{shadow}}</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+          <div>
+            <paper-input on-input="_updateCustomProp" label="Styles" type="text"></paper-input>
+          </div>
+          <small>{{item.desc}}</small>
         </template>
       </paper-dialog-scrollable>
     </paper-dialog>
@@ -54525,7 +54626,7 @@ styles. All other styles should exist as single lines."
 
     <pre><code>{{code}}</code></pre>
 
-    <pre><code><template is="dom-repeat" items="{{customPropsCodeArr}}"><div><span>{{item.name}}</span>: <span>{{item.value}}</span>;</div></template></code></pre>
+    <pre><code><template is="dom-repeat" items="{{customPropsCodeArr}}"><div>{{item.name}}: {{item.value}};</div></template><template is="dom-repeat" items="{{typographyMixinCustomPropsCodeArr}}"><div>{{item.name}}: {<div> @apply({{item.value}});</div>}</div></template><template is="dom-repeat" items="{{shadowMixinCustomPropsCodeArr}}"><div>{{item.name}}: {<div> @apply({{item.value}});</div>}</div></template></code></pre>
   </template>
   <script>
     (function() {
@@ -54577,7 +54678,25 @@ styles. All other styles should exist as single lines."
               return [];
             }
           },
+          mixinCustomPropsArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
           colorsArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          typographyArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          shadowArr: {
             type: Array,
             value: function() {
               return [];
@@ -54591,12 +54710,26 @@ styles. All other styles should exist as single lines."
             value: function() {
               return [];
             }
+          },
+          typographyMixinCustomPropsCodeArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          shadowMixinCustomPropsCodeArr: {
+            type: Array,
+            value: function() {
+              return [];
+            }
           }
         },
 
         observers: [
           '_getProps(analysis.*)',
-          '_getColors(colorsAnalysis.*)'
+          '_getColors(colorsAnalysis.*)',
+          '_getTypography(typographyAnalysis.*)',
+          '_getShadow(shadowAnalysis.*)'
         ],
 
         attached: function() {
@@ -54673,21 +54806,23 @@ styles. All other styles should exist as single lines."
           for (i = 0; i < elements.length; i++) {
             desc += elements[i].desc;
           }
-          var customPropsRegex = /^`--([\S\s]*?)`/gm;
-          var customProps = desc.match(customPropsRegex);
-          if (customProps) {
+          var customPropsRowRegex = /^`--.*/gm;
+          var customPropsRows = desc.match(customPropsRowRegex);
+          if (customPropsRows) {
             var currentCustomProp;
-            var currentCustomPropRegex = /[\w\-]+/;
-            var currentCustomPropStr;
+            var currentCustomPropRegex = /--[\w\-]+/;
+            var currentCustomPropName;
             var colorRegex = /color/;
-            for (i = 0; i < customProps.length; i++) {
-              currentCustomProp = customProps[i];
-              currentCustomProp = currentCustomProp.match(currentCustomPropRegex);
-              currentCustomPropStr = currentCustomProp[0];
-              if (currentCustomPropStr.match(colorRegex)) {
-                this.push('colorCustomPropsArr', currentCustomPropStr);
+            var mixinRegex = /{}/;
+            for (i = 0; i < customPropsRows.length; i++) {
+              currentCustomProp = customPropsRows[i];
+              currentCustomPropName = currentCustomProp.match(currentCustomPropRegex);
+              if (currentCustomProp.match(colorRegex)) {
+                this.push('colorCustomPropsArr', { name: currentCustomPropName, desc: currentCustomProp });
+              } else if (currentCustomProp.match(mixinRegex)) {
+                this.push('mixinCustomPropsArr', { name: currentCustomPropName, desc: currentCustomProp });
               } else {
-                this.push('customPropsArr', currentCustomPropStr);
+                this.push('customPropsArr', { name: currentCustomPropName, desc: currentCustomProp });
               }
             }
           }
@@ -54705,6 +54840,41 @@ styles. All other styles should exist as single lines."
             currentColorVal = colors[i].match(/#\w+/);
             this.push('colorsArr', { name: currentColor, value: currentColorVal });
           }
+        },
+
+        _getMixins: function(val, mixinsEx, currentMixinEx, arr) {
+          var obj = val.value._content;
+          var keys = Object.keys(obj);
+          var content = obj[keys[0]];
+          var mixins = content.match(mixinsEx);
+          var currentMixin;
+          var thisArr = this[arr];
+          for (var i = 0; i < mixins.length; i++) {
+            currentMixin = mixins[i].match(currentMixinEx)[0];
+            var found = false;
+            if (this[arr].length === 0) {
+              this.push(arr, currentMixin);
+            } else {
+              for (var j = 0; j < this[arr].length; j++) {
+                if (this[arr][j] === currentMixin) {
+                  this.splice(arr, j, 1, currentMixin);
+                  found = true;
+                  break;
+                }
+              }
+              if (!found) {
+                this.push(arr, currentMixin);
+              }
+            }
+          }
+        },
+
+        _getTypography: function(val) {
+          this._getMixins(val, /--paper([\S\s]*?):/g, /--paper-\w+-\w+(-\w+)?/, 'typographyArr');
+        },
+
+        _getShadow: function(val) {
+          this._getMixins(val, /--shadow([\S\s]*?):/g, /--shadow-\w+(-\w+)?/, 'shadowArr');
         },
 
         _toggleAttr: function(e) {
@@ -54734,50 +54904,46 @@ styles. All other styles should exist as single lines."
           this.code = Polymer.dom(this).innerHTML.replace(/ class="([\S\s]*?)"| role="([\S\s]*?)"| tabindex="([\S\s]*?)"| value="([\S\s]*?)"| style="([\S\s]*?)"| toggles|=""| aria-\w+="([\S\s]*?)"/g, '');
         },
 
-        _updateCustomProp: function(e) {
-          var prop = e.model.item;
-          var propVal = e.target.value;
+        _setProp: function(prop, val, style, arr) {
           var node = '.el';
-          Polymer.dom(this).querySelector(node).customStyle[prop] = propVal;
+          var thisArr = this[arr];
+          Polymer.dom(this).querySelector(node).customStyle[prop] = style;
           Polymer.dom(this).querySelector(node).updateStyles();
           var found = false;
-          if (this.customPropsCodeArr.length === 0) {
-            this.push('customPropsCodeArr', { name: prop, value: propVal });
+          if (thisArr.length === 0) {
+            this.push(arr, { name: prop, value: val });
           } else {
-            for (var i = 0; i < this.customPropsCodeArr.length; i++) {
-              if (this.customPropsCodeArr[i].name === prop) {
-                this.splice('customPropsCodeArr', i, 1, { name: prop, value: propVal });
+            for (var i = 0; i < thisArr.length; i++) {
+              if (thisArr[i].name === prop) {
+                val === '' ? this.splice(arr, i, 1) : this.splice(arr, i, 1, { name: prop, value: val });
                 found = true;
                 break;
               }
             }
             if (!found) {
-              this.push('customPropsCodeArr', { name: prop, value: propVal });
+              this.push(arr, { name: prop, value: val });
             }
           }
         },
 
+        _updateCustomProp: function(e) {
+          var val = e.model.item.name;
+          this._setProp(e.model.item.name, val, val, 'customPropsCodeArr');
+        },
+
         _updateColorCustomProp: function(e) {
-          var prop = e.model.item;
-          var propVal = 'var(' + e.target.selectedItem.innerHTML.trim() + ')';
-          var node = '.el';
-          Polymer.dom(this).querySelector(node).customStyle[prop] = propVal;
-          Polymer.dom(this).querySelector(node).updateStyles();
-          var found = false;
-          if (this.customPropsCodeArr.length === 0) {
-            this.push('customPropsCodeArr', { name: prop, value: propVal });
-          } else {
-            for (var i = 0; i < this.customPropsCodeArr.length; i++) {
-              if (this.customPropsCodeArr[i].name === prop) {
-                this.splice('customPropsCodeArr', i, 1, { name: prop, value: propVal });
-                found = true;
-                break;
-              }
-            }
-            if (!found) {
-              this.push('customPropsCodeArr', { name: prop, value: propVal });
-            }
-          }
+          var val = 'var(' + e.target.selectedItem.innerHTML.trim() + ')';
+          this._setProp(e.model.item.name, val, val, 'customPropsCodeArr');
+        },
+
+        _updateTypographyMixinCustomProp: function(e) {
+          var mixin = e.target.selectedItem.innerHTML.trim();
+          this._setProp(e.model.item.name[0], mixin, '{ @apply(' + mixin + '); }', 'typographyMixinCustomPropsCodeArr');
+        },
+
+        _updateShadowMixinCustomProp: function(e) {
+          var mixin = e.target.selectedItem.innerHTML.trim();
+          this._setProp(e.model.item.name[0], mixin, '{ @apply(' + mixin + '); }', 'shadowMixinCustomPropsCodeArr');
         },
 
         _updateHostBackgroundColor: function(e) {
