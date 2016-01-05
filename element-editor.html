@@ -383,56 +383,39 @@ MIT
           }
         },
 
-        _getTypography: function(val) {
+        _getMixins: function(val, mixinsEx, currentMixinEx, arr) {
           var obj = val.value._content;
           var keys = Object.keys(obj);
           var content = obj[keys[0]];
-          var mixins = content.match(/--paper([\S\s]*?):/g);
+          var mixins = content.match(mixinsEx);
           var currentMixin;
+          var thisArr = this[arr];
           for (var i = 0; i < mixins.length; i++) {
-            currentMixin = mixins[i].match(/--paper-\w+-\w+(-\w+)?/)[0];
+            currentMixin = mixins[i].match(currentMixinEx)[0];
             var found = false;
-            if (this.typographyArr.length === 0) {
-              this.push('typographyArr', currentMixin);
+            if (this[arr].length === 0) {
+              this.push(arr, currentMixin);
             } else {
-              for (var j = 0; j < this.typographyArr.length; j++) {
-                if (this.typographyArr[j] === currentMixin) {
-                  this.splice('typographyArr', j, 1, currentMixin);
+              for (var j = 0; j < this[arr].length; j++) {
+                if (this[arr][j] === currentMixin) {
+                  this.splice(arr, j, 1, currentMixin);
                   found = true;
                   break;
                 }
               }
               if (!found) {
-                this.push('typographyArr', currentMixin);
+                this.push(arr, currentMixin);
               }
             }
           }
         },
 
+        _getTypography: function(val) {
+          this._getMixins(val, /--paper([\S\s]*?):/g, /--paper-\w+-\w+(-\w+)?/, 'typographyArr');
+        },
+
         _getShadow: function(val) {
-          var obj = val.value._content;
-          var keys = Object.keys(obj);
-          var content = obj[keys[0]];
-          var mixins = content.match(/--shadow([\S\s]*?):/g);
-          var currentMixin;
-          for (var i = 0; i < mixins.length; i++) {
-            currentMixin = mixins[i].match(/--shadow-\w+(-\w+)?/)[0];
-            var found = false;
-            if (this.shadowArr.length === 0) {
-              this.push('shadowArr', currentMixin);
-            } else {
-              for (var j = 0; j < this.shadowArr.length; j++) {
-                if (this.shadowArr[j] === currentMixin) {
-                  this.splice('shadowArr', j, 1, currentMixin);
-                  found = true;
-                  break;
-                }
-              }
-              if (!found) {
-                this.push('shadowArr', currentMixin);
-              }
-            }
-          }
+          this._getMixins(val, /--shadow([\S\s]*?):/g, /--shadow-\w+(-\w+)?/, 'shadowArr');
         },
 
         _toggleAttr: function(e) {
@@ -485,35 +468,23 @@ MIT
         },
 
         _updateCustomProp: function(e) {
-          var prop = e.model.item.name;
-          var val = e.target.value;
-          var style = val;
-          var arr = 'customPropsCodeArr';
-          this._setProp(prop, val, style, arr);
+          var val = e.model.item.name;
+          this._setProp(e.model.item.name, val, val, 'customPropsCodeArr');
         },
 
         _updateColorCustomProp: function(e) {
-          var prop = e.model.item.name;
           var val = 'var(' + e.target.selectedItem.innerHTML.trim() + ')';
-          var style = val;
-          var arr = 'customPropsCodeArr';
-          this._setProp(prop, val, style, arr);
+          this._setProp(e.model.item.name, val, val, 'customPropsCodeArr');
         },
 
         _updateTypographyMixinCustomProp: function(e) {
-          var prop = e.model.item.name[0];
           var mixin = e.target.selectedItem.innerHTML.trim();
-          var style = '{ @apply(' + mixin + '); }';
-          var arr = 'typographyMixinCustomPropsCodeArr';
-          this._setProp(prop, mixin, style, arr);
+          this._setProp(e.model.item.name[0], mixin, '{ @apply(' + mixin + '); }', 'typographyMixinCustomPropsCodeArr');
         },
 
         _updateShadowMixinCustomProp: function(e) {
-          var prop = e.model.item.name[0];
           var mixin = e.target.selectedItem.innerHTML.trim();
-          var style = '{ @apply(' + mixin + '); }';
-          var arr = 'shadowMixinCustomPropsCodeArr';
-          this._setProp(prop, mixin, style, arr);
+          this._setProp(e.model.item.name[0], mixin, '{ @apply(' + mixin + '); }', 'shadowMixinCustomPropsCodeArr');
         },
 
         _updateHostBackgroundColor: function(e) {
