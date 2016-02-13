@@ -4,7 +4,10 @@
   "description": "Polymer elements WYSIWYG editor",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vulcanize --inline-scripts --inline-css --strip-comments elements.html > build.html",
+    "version": "npm update && npm prune && npm dedupe && bower update && bower prune && npm run build && git add -A .",
+    "postversion": "git push --follow-tags && npm publish"
   },
   "repository": {
     "type": "git",

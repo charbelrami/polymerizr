@@ -57394,7 +57394,7 @@ styles. All other styles should exist as single lines."
         },
 
         _cleanCodeOutput: function() {
-          this.code = Polymer.dom(this).innerHTML.replace(/ class="([\S\s]*?)"| role="([\S\s]*?)"| tabindex="([\S\s]*?)"| value="([\S\s]*?)"| style="([\S\s]*?)"| toggles|=""| aria-\w+="([\S\s]*?)"/g, '');
+          this.code = Polymer.dom(this).innerHTML.replace(/ ?(class|role|tabindex|value|style|toggles|aria-\w+)?="([\S\s]*?)"/g, '');
         },
 
         _setProp: function(prop, val, style, arr) {

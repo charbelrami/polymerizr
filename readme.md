@@ -6,8 +6,8 @@
 - [Installation](#installation)
 - [Usage](#usage)
   - [Build](#build)
-  - [Run server](#run-server)
-- [Related](#related)
+  - [Run local server](#run-server)
+  - [Bump version](#bump-version)
 - [License](#license)
 
 ## Introduction
@@ -16,19 +16,22 @@ Polymer elements WYSIWYG editor
 
 ## Installation
 
+- Clone the repository
+- Install *vulcanize* and *polyserve* globally
+
 ```sh
 $ npm i -g vulcanize polyserve
 ```
 
-<!-- ```sh
-$ npm i -g vulcanize crisper polyserve
-``` -->
+- `cd` into directory and install local dependencies
 
 ```sh
 $ cd polymerizr && npm i && bower i
 ```
 
 ## Usage
+
+- `cd` into directory
 
 ```sh
 $ cd polymerizr
@@ -37,26 +40,32 @@ $ cd polymerizr
 ### Build
 
 ```sh
-$ vulcanize --inline-scripts --inline-css --strip-comments elements.html > build.html
+$ npm run build
 ```
 
-<!-- ```sh
-$ vulcanize --inline-scripts --inline-css --strip-comments elements.html | crisper --html build.html --js build.js
-``` -->
-
-### Run server
+### Run local server
 
 ```sh
 $ polyserve
 ```
 
-## Related
+### Bump version
 
-- [Grid Element](http://charbelrami.github.io/grid-element)
-- [Flex Element](http://charbelrami.github.io/flex-element)
+```sh
+$ npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]
+```
+
+- Ensures the working tree is clean
+- Updates dependencies
+- Uninstalls extraneous packages
+- Reduces duplication in the dependency tree
+- Vulcanizes elements
+- Bumps the version in package.json
+- Updates the git index to match the working tree
+- Creates a git tag
+- Pushes all the refs, including annotated tags
+- Publishes the package to the npm registry
 
 ## License
-
-© 2015 Charbel Rami
 
 [MIT](license)
