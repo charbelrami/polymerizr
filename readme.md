@@ -6,7 +6,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
   - [Build](#build)
-  - [Run local server](#run-server)
+  - [Run local server](#run-local-server)
   - [Bump version](#bump-version)
 - [License](#license)
 
