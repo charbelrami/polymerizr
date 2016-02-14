@@ -57440,7 +57440,7 @@ styles. All other styles should exist as single lines."
         },
 
         _cleanCodeOutput: function() {
-          this.code = Polymer.dom(this).innerHTML.replace(/ ?(class|role|tabindex|value|style|toggles|aria-\w+)?="([\S\s]*?)"/g, '');
+          this.code = Polymer.dom(this).innerHTML.replace(/ (class|role|tabindex|value|style|aria-\w+)="([\S\s]*?)"| toggles|=""/g, '');
         },
 
         _setProp: function(prop, val, style, arr) {
