@@ -37799,7 +37799,7 @@ if (!window.Promise) {
     };
 
     --layout-around-justified: {
-      -ms-flex-pack: around;
+      -ms-flex-pack: distribute;
       -webkit-justify-content: space-around;
       justify-content: space-around;
     };
@@ -39678,11 +39678,13 @@ if (!window.Promise) {
    * size or hidden state of their children) and "resizables" (elements that need to be
    * notified when they are resized or un-hidden by their parents in order to take
    * action on their new measurements).
+   * 
    * Elements that perform measurement should add the `IronResizableBehavior` behavior to
    * their element definition and listen for the `iron-resize` event on themselves.
    * This event will be fired when they become showing after having been hidden,
    * when they are resized explicitly by another resizable, or when the window has been
    * resized.
+   * 
    * Note, the `iron-resize` event is non-bubbling.
    *
    * @polymerBehavior Polymer.IronResizableBehavior
@@ -40226,7 +40228,8 @@ if (!window.Promise) {
     },
 
     _valueForItem: function(item) {
-      return item[this.attrForSelected] || item.getAttribute(this.attrForSelected);
+      var propValue = item[this.attrForSelected];
+      return propValue != undefined ? propValue : item.getAttribute(this.attrForSelected);
     },
 
     _applySelection: function(item, isSelected) {
@@ -43835,7 +43838,7 @@ if (!window.Promise) {
         }
         this.$.sizedImgDiv.style.backgroundImage = src ? 'url("' + src + '")' : '';
 
-        this._setLoading(true);
+        this._setLoading(!!src);
         this._setLoaded(false);
         this._setError(false);
       },
@@ -44824,6 +44827,8 @@ if (!window.Promise) {
         white-space: nowrap;
         cursor: pointer;
         --calculated-paper-checkbox-size: var(--paper-checkbox-size, 18px);
+        @apply(--paper-font-common-base);
+        line-height: 0;
       }
 
       :host(:focus) {
@@ -44864,7 +44869,7 @@ if (!window.Promise) {
       }
 
       #ink[checked] {
-        color: var(--paper-checkbox-checked-ink-color, --default-primary-color);
+        color: var(--paper-checkbox-checked-ink-color, --primary-color);
       }
 
       #checkbox {
@@ -44904,8 +44909,8 @@ if (!window.Promise) {
       }
 
       #checkbox.checked {
-        background-color: var(--paper-checkbox-checked-color, --default-primary-color);
-        border-color: var(--paper-checkbox-checked-color, --default-primary-color);
+        background-color: var(--paper-checkbox-checked-color, --primary-color);
+        border-color: var(--paper-checkbox-checked-color, --primary-color);
       }
 
       #checkmark {
@@ -44918,13 +44923,14 @@ if (!window.Promise) {
         border-right-width: calc(2/15 * var(--calculated-paper-checkbox-size));
         border-bottom-width: calc(2/15 * var(--calculated-paper-checkbox-size));
         border-color: var(--paper-checkbox-checkmark-color, white);
-        transform-origin: 97% 86%;
         -webkit-transform-origin: 97% 86%;
+        transform-origin: 97% 86%;
+        box-sizing: content-box; /* protect against page-level box-sizing */
       }
 
       :host-context([dir="rtl"]) #checkmark {
-        transform-origin: 50% 14%;
         -webkit-transform-origin: 50% 14%;
+        transform-origin: 50% 14%;
       }
 
       /* label */
@@ -44934,6 +44940,7 @@ if (!window.Promise) {
         vertical-align: middle;
         padding-left: var(--paper-checkbox-label-spacing, 8px);
         white-space: normal;
+        line-height: normal;
         pointer-events: none;
         color: var(--paper-checkbox-label-color, --primary-text-color);
       }
@@ -45301,6 +45308,16 @@ CSS properties               | Action
     this._minimumZ = 101;
 
     this._backdrops = [];
+
+    this._backdropElement = null;
+    Object.defineProperty(this, 'backdropElement', {
+      get: function() {
+        if (!this._backdropElement) {
+          this._backdropElement = document.createElement('iron-overlay-backdrop');
+        }
+        return this._backdropElement;
+      }.bind(this)
+    });
   }
 
   Polymer.IronOverlayManagerClass.prototype._applyOverlayZ = function(overlay, aboveZ) {
@@ -45381,15 +45398,6 @@ CSS properties               | Action
       this._backdrops.splice(index, 1);
     }
   };
-
-  Object.defineProperty(Polymer.IronOverlayManagerClass.prototype, "backdropElement", {
-    get: function() {
-      if (!this._backdropElement) {
-        this._backdropElement = document.createElement('iron-overlay-backdrop');
-      }
-      return this._backdropElement;
-    }
-  });
 
   Polymer.IronOverlayManagerClass.prototype.getBackdrops = function() {
     return this._backdrops;
@@ -45525,10 +45533,14 @@ CSS properties               | Action
       this.style.zIndex = this._manager.backdropZ();
       // close only if no element with backdrop is left
       if (this._manager.getBackdrops().length === 0) {
+        // Read style before setting opened.
+        var cs = getComputedStyle(this);
+        var noAnimation = (cs.transitionDuration === '0s' || cs.opacity == 0);
         this._setOpened(false);
-        // complete() will be called after the transition is done.
-        // If animations are disabled via custom-styles, user is expected to call
-        // complete() after close()
+        // In case of no animations, complete
+        if (noAnimation) {
+          this.complete();
+        }
       }
     },
 
@@ -45674,6 +45686,18 @@ context. You should place this element as a child of `<body>` whenever possible.
         value: function() {
           return this._onCaptureKeydown.bind(this);
         }
+      },
+
+      _boundOnCaptureFocus: {
+        type: Function,
+        value: function() {
+          return this._onCaptureFocus.bind(this);
+        }
+      },
+
+      /** @type {?Node} */
+      _focusedChild: {
+        type: Object
       }
 
     },
@@ -45691,10 +45715,13 @@ context. You should place this element as a child of `<body>` whenever possible.
     },
 
     get _focusNode() {
-      return Polymer.dom(this).querySelector('[autofocus]') || this;
+      return this._focusedChild || Polymer.dom(this).querySelector('[autofocus]') || this;
     },
 
     ready: function() {
+      // with-backdrop need tabindex to be set in order to trap the focus.
+      // If it is not set, IronOverlayBehavior will set it, and remove it if with-backdrop = false.
+      this.__shouldRemoveTabIndex = false;
       this._ensureSetup();
     },
 
@@ -45804,6 +45831,14 @@ context. You should place this element as a child of `<body>` whenever possible.
     },
 
     _withBackdropChanged: function() {
+      // If tabindex is already set, no need to override it.
+      if (this.withBackdrop && !this.hasAttribute('tabindex')) {
+        this.setAttribute('tabindex', '-1');
+        this.__shouldRemoveTabIndex = true;
+      } else if (this.__shouldRemoveTabIndex) {
+        this.removeAttribute('tabindex');
+        this.__shouldRemoveTabIndex = false;
+      }
       if (this.opened) {
         this._manager.trackBackdrop(this);
         if (this.withBackdrop) {
@@ -45837,6 +45872,7 @@ context. You should place this element as a child of `<body>` whenever possible.
     _toggleListeners: function () {
       this._toggleListener(this.opened, document, 'tap', this._boundOnCaptureClick, true);
       this._toggleListener(this.opened, document, 'keydown', this._boundOnCaptureKeydown, true);
+      this._toggleListener(this.opened, document, 'focus', this._boundOnCaptureFocus, true);
     },
 
     // tasks which must occur before opening; e.g. making the element visible
@@ -45882,6 +45918,7 @@ context. You should place this element as a child of `<body>` whenever possible.
       this.style.display = 'none';
       this._manager.removeOverlay(this);
 
+      this._focusedChild = null;
       this._applyFocus();
 
       this.notifyResize();
@@ -45915,9 +45952,12 @@ context. You should place this element as a child of `<body>` whenever possible.
 
     _onCaptureClick: function(event) {
       if (this._manager.currentOverlay() === this &&
-          !this.noCancelOnOutsideClick &&
           Polymer.dom(event).path.indexOf(this) === -1) {
-        this.cancel();
+        if (this.noCancelOnOutsideClick) {
+          this._applyFocus();
+        } else {
+          this.cancel();
+        }
       }
     },
 
@@ -45927,6 +45967,19 @@ context. You should place this element as a child of `<body>` whenever possible.
           !this.noCancelOnEscKey &&
           event.keyCode === ESC) {
         this.cancel();
+      }
+    },
+
+    _onCaptureFocus: function (event) {
+      if (this._manager.currentOverlay() === this &&
+          this.withBackdrop) {
+        var path = Polymer.dom(event).path;
+        if (path.indexOf(this) === -1) {
+          event.stopPropagation();
+          this._applyFocus();
+        } else {
+          this._focusedChild = path[0];
+        }
       }
     },
 
@@ -46021,39 +46074,28 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
     properties: {
 
       /**
-       * If `modal` is true, this implies `no-cancel-on-outside-click` and `with-backdrop`.
+       * If `modal` is true, this implies `no-cancel-on-outside-click`, `no-cancel-on-esc-key` and `with-backdrop`.
        */
       modal: {
-        observer: '_modalChanged',
         type: Boolean,
         value: false
-      },
-
-      /** @type {?Node} */
-      _lastFocusedElement: {
-        type: Object
-      },
-
-      _boundOnFocus: {
-        type: Function,
-        value: function() {
-          return this._onFocus.bind(this);
-        }
-      },
-
-      _boundOnBackdropClick: {
-        type: Function,
-        value: function() {
-          return this._onBackdropClick.bind(this);
-        }
       }
 
     },
 
+    observers: [
+      '_modalChanged(modal, _readied)'
+    ],
+
     listeners: {
-      'tap': '_onDialogClick',
-      'iron-overlay-opened': '_onIronOverlayOpened',
-      'iron-overlay-closed': '_onIronOverlayClosed'
+      'tap': '_onDialogClick'
+    },
+
+    ready: function () {
+      // Only now these properties can be read.
+      this.__prevNoCancelOnOutsideClick = this.noCancelOnOutsideClick;
+      this.__prevNoCancelOnEscKey = this.noCancelOnEscKey;
+      this.__prevWithBackdrop = this.withBackdrop;
     },
 
     attached: function() {
@@ -46066,17 +46108,34 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
       Polymer.dom(this).unobserveNodes(this._ariaObserver);
     },
 
-    _modalChanged: function() {
-      if (this.modal) {
+    _modalChanged: function(modal, readied) {
+      if (modal) {
         this.setAttribute('aria-modal', 'true');
       } else {
         this.setAttribute('aria-modal', 'false');
       }
-      // modal implies noCancelOnOutsideClick and withBackdrop if true, don't overwrite
-      // those properties otherwise.
-      if (this.modal) {
+
+      // modal implies noCancelOnOutsideClick, noCancelOnEscKey and withBackdrop.
+      // We need to wait for the element to be ready before we can read the
+      // properties values.
+      if (!readied) {
+        return;
+      }
+
+      if (modal) {
+        this.__prevNoCancelOnOutsideClick = this.noCancelOnOutsideClick;
+        this.__prevNoCancelOnEscKey = this.noCancelOnEscKey;
+        this.__prevWithBackdrop = this.withBackdrop;
         this.noCancelOnOutsideClick = true;
+        this.noCancelOnEscKey = true;
         this.withBackdrop = true;
+      } else {
+        // If the value was changed to false, let it false.
+        this.noCancelOnOutsideClick = this.noCancelOnOutsideClick &&
+          this.__prevNoCancelOnOutsideClick;
+        this.noCancelOnEscKey = this.noCancelOnEscKey &&
+          this.__prevNoCancelOnEscKey;
+        this.withBackdrop = this.withBackdrop && this.__prevWithBackdrop;
       }
     },
 
@@ -46106,57 +46165,21 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
       this.closingReason.confirmed = confirmed;
     },
 
+    /**
+     * Will dismiss the dialog if user clicked on an element with dialog-dismiss
+     * or dialog-confirm attribute.
+     */
     _onDialogClick: function(event) {
-      var target = Polymer.dom(event).rootTarget;
-      while (target && target !== this) {
-        if (target.hasAttribute) {
-          if (target.hasAttribute('dialog-dismiss')) {
-            this._updateClosingReasonConfirmed(false);
-            this.close();
-            event.stopPropagation();
-            break;
-          } else if (target.hasAttribute('dialog-confirm')) {
-            this._updateClosingReasonConfirmed(true);
-            this.close();
-            event.stopPropagation();
-            break;
-          }
-        }
-        target = Polymer.dom(target).parentNode;
-      }
-    },
-
-    _onIronOverlayOpened: function() {
-      if (this.modal) {
-        document.body.addEventListener('focus', this._boundOnFocus, true);
-        document.body.addEventListener('click', this._boundOnBackdropClick, true);
-      }
-    },
-
-    _onIronOverlayClosed: function() {
-      this._lastFocusedElement = null;
-      document.body.removeEventListener('focus', this._boundOnFocus, true);
-      document.body.removeEventListener('click', this._boundOnBackdropClick, true);
-    },
-
-    _onFocus: function(event) {
-      if (this.modal && this._manager.currentOverlay() === this) {
-        if (Polymer.dom(event).path.indexOf(this) !== -1) {
-          this._lastFocusedElement = event.target;
-        } else if (this._lastFocusedElement) {
-          this._lastFocusedElement.focus();
-        } else {
-          this._focusNode.focus();
-        }
-      }
-    },
-
-    _onBackdropClick: function(event) {
-      if (this.modal && this._manager.currentOverlay() === this && Polymer.dom(event).path.indexOf(this) === -1) {
-        if (this._lastFocusedElement) {
-          this._lastFocusedElement.focus();
-        } else {
-          this._focusNode.focus();
+      // Search for the element with dialog-confirm or dialog-dismiss,
+      // from the root target until this (excluded).
+      var path = Polymer.dom(event).path;
+      for (var i = 0; i < path.indexOf(this); i++) {
+        var target = path[i];
+        if (target.hasAttribute && (target.hasAttribute('dialog-dismiss') || target.hasAttribute('dialog-confirm'))) {
+          this._updateClosingReasonConfirmed(target.hasAttribute('dialog-confirm'));
+          this.close();
+          event.stopPropagation();
+          break;
         }
       }
     }
@@ -46248,6 +46271,7 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
     },
 
     _renderOpened: function() {
+      this.cancelAnimation();
       if (this.withBackdrop) {
         this.backdropElement.open();
       }
@@ -46255,6 +46279,7 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
     },
 
     _renderClosed: function() {
+      this.cancelAnimation();
       if (this.withBackdrop) {
         this.backdropElement.close();
       }
@@ -46281,8 +46306,12 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
   <style>
 
     :host {
-      display: block;
-      position: relative;
+      /* Needed for correct flex rendering on Firefox & Chrome Canary */
+      min-height: 0;
+      max-height: 100%;
+
+      @apply(--layout);
+      @apply(--layout-relative);
     }
 
     :host(.is-scrolled:not(:first-child))::before {
@@ -46308,12 +46337,9 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
     .scrollable {
       padding: 0 24px;
 
+      @apply(--layout-flex);
       @apply(--layout-scroll);
       @apply(--paper-dialog-scrollable);
-    }
-
-    .fit {
-      @apply(--layout-fit);
     }
   </style>
 
@@ -46327,8 +46353,6 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
 
 <script>
 
-(function() {
-
   Polymer({
 
     is: 'paper-dialog-scrollable',
@@ -46340,17 +46364,13 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
        * @type {?Node}
        */
       dialogElement: {
-        type: Object,
-        value: function() {
-          return this.parentNode;
-        }
+        type: Object
       }
 
     },
 
     listeners: {
-      'scrollable.scroll': '_onScroll',
-      'iron-resize': '_onIronResize'
+      'scrollable.scroll': '_scroll'
     },
 
     /**
@@ -46360,18 +46380,14 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
       return this.$.scrollable;
     },
 
+    ready: function () {
+      this._ensureTarget();
+    },
+
     attached: function() {
       this.classList.add('no-padding');
-      // Set itself to the overlay sizing target
-      this.dialogElement.sizingTarget = this.scrollTarget;
-      // If the host is sized, fit the scrollable area to the container. Otherwise let it be
-      // its natural size.
-      requestAnimationFrame(function() {
-        if (this.offsetHeight > 0) {
-          this.$.scrollable.classList.add('fit');
-        }
-        this._scroll();
-      }.bind(this));
+      this._ensureTarget();
+      requestAnimationFrame(this._scroll.bind(this));
     },
 
     _scroll: function() {
@@ -46381,13 +46397,17 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
         this.scrollTarget.scrollTop + this.scrollTarget.offsetHeight >= this.scrollTarget.scrollHeight);
     },
 
-    _onScroll: function() {
-      this._scroll();
+    _ensureTarget: function () {
+      // read parentNode on attached because if dynamically created,
+      // parentNode will be null on creation.
+      this.dialogElement = this.dialogElement || Polymer.dom(this).parentNode;
+      // Set itself to the overlay sizing target
+      if (this.dialogElement) {
+        this.dialogElement.sizingTarget = this.scrollTarget;
+      }
     }
 
-  })
-
-})();
+  });
 
 </script>
 
@@ -47879,12 +47899,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
     listeners: {
       'addon-attached': '_onAddonAttached',
-      'focus': '_onFocus'
     },
-
-    observers: [
-      '_focusedControlStateChanged(focused)'
-    ],
 
     keyBindings: {
       'shift+tab:keydown': '_onShiftTabDown'
@@ -47954,12 +47969,17 @@ is separate from validation, and `allowed-pattern` does not affect how the input
     },
 
     /**
-     * Forward focus to inputElement
+     * Forward focus to inputElement. Overriden from IronControlState.
      */
-    _onFocus: function() {
-      if (!this._shiftTabPressed) {
+    _focusBlurHandler: function(event) {
+      if (this._shiftTabPressed)
+        return;
+
+      Polymer.IronControlState._focusBlurHandler.call(this, event);
+
+      // Forward the focus to the nested input.
+      if (this.focused)
         this._focusableElement.focus();
-      }
     },
 
     /**
@@ -48009,24 +48029,6 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
     _computeAlwaysFloatLabel: function(alwaysFloatLabel, placeholder) {
       return placeholder || alwaysFloatLabel;
-    },
-
-    _focusedControlStateChanged: function(focused) {
-      // IronControlState stops the focus and blur events in order to redispatch them on the host
-      // element, but paper-input-container listens to those events. Since there are more
-      // pending work on focus/blur in IronControlState, I'm putting in this hack to get the
-      // input focus state working for now.
-      if (!this.$.container) {
-        this.$.container = Polymer.dom(this.root).querySelector('paper-input-container');
-        if (!this.$.container) {
-          return;
-        }
-      }
-      if (focused) {
-        this.$.container._onFocus();
-      } else {
-        this.$.container._onBlur();
-      }
     },
 
     _updateAriaLabelledBy: function() {
@@ -48145,13 +48147,13 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
       state.value = state.value || '';
 
-      // Account for the textarea's new lines.
-      var str = state.value.replace(/(\r\n|\n|\r)/g, '--').length;
+      var counter = state.value.length;
 
       if (state.inputElement.hasAttribute('maxlength')) {
-        str += '/' + state.inputElement.getAttribute('maxlength');
+        counter += '/' + state.inputElement.getAttribute('maxlength');
       }
-      this._charCounterStr = str;
+
+      this._charCounterStr = counter;
     }
   });
 </script>
@@ -48189,8 +48191,9 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       .focused-line {
         @apply(--layout-fit);
 
-        background: var(--paper-input-container-focus-color, --default-primary-color);
+        background: var(--paper-input-container-focus-color, --primary-color);
         height: 2px;
+
         -webkit-transform-origin: center center;
         transform-origin: center center;
         -webkit-transform: scale3d(0,1,1);
@@ -48209,7 +48212,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       }
 
       .underline.is-invalid .focused-line {
-        background: var(--paper-input-container-invalid-color, --google-red-500);
+        background: var(--paper-input-container-invalid-color, --error-color);
         -webkit-transform: none;
         transform: none;
         -webkit-transition: -webkit-transform 0.25s;
@@ -48221,8 +48224,8 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       .unfocused-line {
         @apply(--layout-fit);
 
-        height: 1px;
         background: var(--paper-input-container-color, --secondary-text-color);
+        height: 1px;
 
         @apply(--paper-input-container-underline);
       }
@@ -48238,6 +48241,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       .label-and-input-container {
         @apply(--layout-flex-auto);
         @apply(--layout-relative);
+
         width: 100%;
         max-width: 100%;
       }
@@ -48258,26 +48262,26 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         width: 100%;
         font: inherit;
         color: var(--paper-input-container-color, --secondary-text-color);
+        -webkit-transition: -webkit-transform 0.25s, width 0.25s;
+        transition: transform 0.25s, width 0.25s;
+        -webkit-transform-origin: left top;
+        transform-origin: left top;
 
         @apply(--paper-font-common-nowrap);
         @apply(--paper-font-subhead);
         @apply(--paper-input-container-label);
+        @apply(--paper-transition-easing);
       }
 
       .input-content.label-is-floating ::content label,
       .input-content.label-is-floating ::content .paper-input-label {
         -webkit-transform: translateY(-75%) scale(0.75);
         transform: translateY(-75%) scale(0.75);
-        -webkit-transition: -webkit-transform 0.25s, width 0.25s;
-        transition: transform 0.25s, width 0.25s;
-        -webkit-transform-origin: left top;
-        transform-origin: left top;
 
         /* Since we scale to 75/100 of the size, we actually have 100/75 of the
         original space now available */
         width: 133%;
 
-        @apply(--paper-transition-easing);
         @apply(--paper-input-container-label-floating);
       }
 
@@ -48293,14 +48297,14 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
       .input-content.label-is-highlighted ::content label,
       .input-content.label-is-highlighted ::content .paper-input-label {
-        color: var(--paper-input-container-focus-color, --default-primary-color);
+        color: var(--paper-input-container-focus-color, --primary-color);
 
         @apply(--paper-input-container-label-focus);
       }
 
       .input-content.is-invalid ::content label,
       .input-content.is-invalid ::content .paper-input-label {
-        color: var(--paper-input-container-invalid-color, --google-red-500);
+        color: var(--paper-input-container-invalid-color, --error-color);
       }
 
       .input-content.label-is-hidden ::content label,
@@ -48330,12 +48334,14 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
       ::content [prefix] {
         @apply(--paper-font-subhead);
+
         @apply(--paper-input-prefix);
         @apply(--layout-flex-none);
       }
 
       ::content [suffix] {
         @apply(--paper-font-subhead);
+
         @apply(--paper-input-suffix);
         @apply(--layout-flex-none);
       }
@@ -48354,11 +48360,11 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       }
 
       .add-on-content.is-invalid ::content * {
-        color: var(--paper-input-container-invalid-color, --google-red-500);
+        color: var(--paper-input-container-invalid-color, --error-color);
       }
 
       .add-on-content.is-highlighted ::content * {
-        color: var(--paper-input-container-focus-color, --default-primary-color);
+        color: var(--paper-input-container-focus-color, --primary-color);
       }
     </style>
 
@@ -48676,7 +48682,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         display: inline-block;
         visibility: hidden;
 
-        color: var(--paper-input-container-invalid-color, --google-red-500);
+        color: var(--paper-input-container-invalid-color, --error-color);
 
         @apply(--paper-font-caption);
         @apply(--paper-input-error);
@@ -48844,6 +48850,11 @@ is separate from validation, and `allowed-pattern` does not affect how the input
        * @param {HTMLElement} element The element that should lock scroll.
        */
       pushScrollLock: function(element) {
+        // Prevent pushing the same element twice
+        if (this._lockingElements.indexOf(element) >= 0) {
+          return;
+        }
+
         if (this._lockingElements.length === 0) {
           this._lockScrollInteractions();
         }
@@ -48937,7 +48948,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       _scrollInteractionHandler: function(event) {
         if (Polymer
               .IronDropdownScrollManager
-              .elementIsScrollLocked(event.target)) {
+              .elementIsScrollLocked(Polymer.dom(event).rootTarget)) {
           if (event.type === 'keydown' &&
               !Polymer.IronDropdownScrollManager._isScrollingKeypress(event)) {
             return;
@@ -48964,13 +48975,13 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         document.body.style.overflowY = 'hidden';
 
         // Modern `wheel` event for mouse wheel scrolling:
-        window.addEventListener('wheel', this._scrollInteractionHandler, true);
+        document.addEventListener('wheel', this._scrollInteractionHandler, true);
         // Older, non-standard `mousewheel` event for some FF:
-        window.addEventListener('mousewheel', this._scrollInteractionHandler, true);
+        document.addEventListener('mousewheel', this._scrollInteractionHandler, true);
         // IE:
-        window.addEventListener('DOMMouseScroll', this._scrollInteractionHandler, true);
+        document.addEventListener('DOMMouseScroll', this._scrollInteractionHandler, true);
         // Mobile devices can scroll on touch move:
-        window.addEventListener('touchmove', this._scrollInteractionHandler, true);
+        document.addEventListener('touchmove', this._scrollInteractionHandler, true);
         // Capture keydown to prevent scrolling keys (pageup, pagedown etc.)
         document.addEventListener('keydown', this._scrollInteractionHandler, true);
       },
@@ -48980,10 +48991,10 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         document.body.style.overflowX = this._originalBodyStyles.overflowX;
         document.body.style.overflowY = this._originalBodyStyles.overflowY;
 
-        window.removeEventListener('wheel', this._scrollInteractionHandler, true);
-        window.removeEventListener('mousewheel', this._scrollInteractionHandler, true);
-        window.removeEventListener('DOMMouseScroll', this._scrollInteractionHandler, true);
-        window.removeEventListener('touchmove', this._scrollInteractionHandler, true);
+        document.removeEventListener('wheel', this._scrollInteractionHandler, true);
+        document.removeEventListener('mousewheel', this._scrollInteractionHandler, true);
+        document.removeEventListener('DOMMouseScroll', this._scrollInteractionHandler, true);
+        document.removeEventListener('touchmove', this._scrollInteractionHandler, true);
         document.removeEventListener('keydown', this._scrollInteractionHandler, true);
       }
     };
@@ -49172,6 +49183,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
         /**
          * The element that should be focused when the dropdown opens.
+         * @deprecated
          */
         get _focusTarget() {
           return this.focusTarget || this.containedElement;
@@ -49271,10 +49283,6 @@ is separate from validation, and `allowed-pattern` does not affect how the input
             this._prepareDropdown();
             Polymer.IronOverlayBehaviorImpl._openedChanged.apply(this, arguments);
           }
-
-          if (this.opened) {
-            this._focusContent();
-          }
         },
 
         /**
@@ -49329,7 +49337,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
           var scrollTop;
           var scrollLeft;
 
-          if (containedElement) {
+          if (this.opened && containedElement) {
             scrollTop = containedElement.scrollTop;
             scrollLeft = containedElement.scrollLeft;
           }
@@ -49340,7 +49348,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
           Polymer.IronOverlayBehaviorImpl._onIronResize.apply(this, arguments);
 
-          if (containedElement) {
+          if (this.opened && containedElement) {
             containedElement.scrollTop = scrollTop;
             containedElement.scrollLeft = scrollLeft;
           }
@@ -49425,16 +49433,15 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         },
 
         /**
-         * Focuses the configured focus target.
+         * Apply focus to focusTarget or containedElement
          */
-        _focusContent: function() {
-          // NOTE(cdata): This is async so that it can attempt the focus after
-          // `display: none` is removed from the element.
-          this.async(function() {
-            if (this._focusTarget) {
-              this._focusTarget.focus();
-            }
-          });
+        _applyFocus: function () {
+          var focusTarget = this.focusTarget || this.containedElement;
+          if (focusTarget && this.opened && !this.noAutoFocus) {
+            focusTarget.focus();
+          } else {
+            Polymer.IronOverlayBehaviorImpl._applyFocus.apply(this, arguments);
+          }
         }
       });
     })();
@@ -50206,30 +50213,35 @@ is separate from validation, and `allowed-pattern` does not affect how the input
   <template strip-whitespace="">
     <style include="paper-material-shared-styles">
       :host {
-        display: inline-block;
-        position: relative;
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+
+        background: var(--paper-fab-background, --accent-color);
+        border-radius: 50%;
+        box-sizing: border-box;
+        color: var(--text-primary-color);
+        cursor: pointer;
+        height: 56px;
+        min-width: 0;
         outline: none;
+        padding: 16px;
+        position: relative;
         -moz-user-select: none;
         -ms-user-select: none;
         -webkit-user-select: none;
-        -webkit-tap-highlight-color: rgba(0,0,0,0);
         user-select: none;
-        cursor: pointer;
-
-        box-sizing: border-box;
-        min-width: 0;
         width: 56px;
-        height: 56px;
-        background: var(--paper-fab-background, --accent-color);
-        color: var(--text-primary-color);
-        border-radius: 50%;
-        padding: 16px;
-
         z-index: 0;
 
-        @apply(--layout-vertical);
-        @apply(--layout-center-center);
+        /* NOTE: Both values are needed, since some phones require the value `transparent`. */
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-tap-highlight-color: transparent;
+
         @apply(--paper-fab);
+      }
+
+      [hidden] {
+        display: none !important;
       }
 
       :host([mini]) {
@@ -50243,6 +50255,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       :host([disabled]) {
         color: var(--paper-fab-disabled-text, --paper-grey-500);
         background: var(--paper-fab-disabled-background, --paper-grey-300);
+
         @apply(--paper-fab-disabled);
       }
 
@@ -50250,66 +50263,80 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         @apply(--paper-fab-iron-icon);
       }
 
+      span {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+      }
+
       :host(.keyboard-focus) {
         background: var(--paper-fab-keyboard-focus-background, --paper-pink-900);
       }
     </style>
 
-    <iron-icon id="icon" src="[[src]]" icon="[[icon]]"></iron-icon>
+    <iron-icon id="icon" hidden$="{{!_computeIsIconFab(icon, src)}}" src="[[src]]" icon="[[icon]]"></iron-icon>
+    <span hidden$="{{_computeIsIconFab(icon, src)}}">{{label}}</span>
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'paper-fab',
+  <script>
+    Polymer({
+      is: 'paper-fab',
 
-    behaviors: [
-      Polymer.PaperButtonBehavior
-    ],
+      behaviors: [
+        Polymer.PaperButtonBehavior
+      ],
 
-    properties: {
-      /**
-       * The URL of an image for the icon. If the src property is specified,
-       * the icon property should not be.
-       *
-       * @attribute src
-       * @type string
-       * @default ''
-       */
-      src: {
-        type: String,
-        value: ''
+      properties: {
+        /**
+         * The URL of an image for the icon. If the src property is specified,
+         * the icon property should not be.
+         */
+        src: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Specifies the icon name or index in the set of icons available in
+         * the icon's icon set. If the icon property is specified,
+         * the src property should not be.
+         */
+        icon: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Set this to true to style this is a "mini" FAB.
+         */
+        mini: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * The label displayed in the badge. The label is centered, and ideally
+         * should have very few characters.
+         */
+        label: {
+          type: String,
+          observer: '_labelChanged'
+        }
       },
 
-      /**
-       * Specifies the icon name or index in the set of icons available in
-       * the icon's icon set. If the icon property is specified,
-       * the src property should not be.
-       *
-       * @attribute icon
-       * @type string
-       * @default ''
-       */
-      icon: {
-        type: String,
-        value: ''
+      _labelChanged: function() {
+        this.setAttribute('aria-label', this.label);
       },
 
-      /**
-       * Set this to true to style this is a "mini" FAB.
-       *
-       * @attribute mini
-       * @type boolean
-       * @default false
-       */
-      mini: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
+      _computeIsIconFab: function(icon, src) {
+        return (icon.length > 0) || (src.length > 0);
       }
-    }
-  });
-</script>
+    });
+  </script>
+</dom-module>
 
 
 <dom-module id="paper-header-panel" assetpath="bower_components/paper-header-panel/">
@@ -50546,6 +50573,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
           atTop: {
             type: Boolean,
             value: true,
+            notify: true,
             readOnly: true
           }
         },
@@ -51406,7 +51434,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
      * Selects the given value. If the `multi` property is true, then the selected state of the
      * `value` will be toggled; otherwise the `value` will be selected.
      *
-     * @param {string} value the value to select.
+     * @param {string|number} value the value to select.
      */
     select: function(value) {
       if (this._defaultFocusAsync) {
@@ -51568,6 +51596,13 @@ is separate from validation, and `allowed-pattern` does not affect how the input
     _onFocus: function(event) {
       if (Polymer.IronMenuBehaviorImpl._shiftTabPressed) {
         // do not focus the menu itself
+        return;
+      }
+
+      // Do not focus the selected tab if the deepest target is part of the
+      // menu element's local DOM and is focusable.
+      var rootTarget = Polymer.dom(event).rootTarget;
+      if (rootTarget !== this && typeof rootTarget.tabIndex !== "undefined" && !this.isLightDescendant(rootTarget)) {
         return;
       }
 
@@ -53130,14 +53165,13 @@ is separate from validation, and `allowed-pattern` does not affect how the input
      * @param {boolean} smooth true if the scroll position should be smoothly adjusted.
      */
     condense: function(smooth) {
-      var ctx = Polymer.PaperScrollHeaderPanel;
       if (this.condenses && !this.fixed && !this.noReveal) {
         switch (this.headerState) {
-          case ctx.HEADER_STATE_HIDDEN:
+          case 1:
             this.scroll(this.scroller.scrollTop - (this._headerMaxDelta - this._headerMargin), smooth);
           break;
-          case ctx.HEADER_STATE_EXPANDED:
-          case ctx.HEADER_STATE_INTERPOLATED:
+          case 0:
+          case 3:
             this.scroll(this._headerMargin, smooth);
           break;
         }
@@ -53183,16 +53217,16 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       s.top = this.fixed ? this.headerHeight + 'px' : '';
 
       if (this.fixed) {
-        this._setHeaderState(this.HEADER_STATE_EXPANDED);
+        this._setHeaderState(0);
         this._transformHeader(null);
       } else {
         switch (this.headerState) {
-          case this.HEADER_STATE_HIDDEN:
+          case 1:
             this._transformHeader(this._headerMaxDelta);
-            break;
-          case this.HEADER_STATE_CONDENSED:
+          break;
+          case 2:
             this._transformHeader(this._headerMargin);
-            break;
+          break;
         }
       }
     },
@@ -53256,7 +53290,6 @@ is separate from validation, and `allowed-pattern` does not affect how the input
     },
 
     _updateScrollState: function(scrollTop) {
-      var ctx = Polymer.PaperScrollHeaderPanel;
       var deltaScrollTop = scrollTop - this._prevScrollTop;
       var y = Math.max(0, (this.noReveal) ? scrollTop : this._y + deltaScrollTop);
 
@@ -53264,19 +53297,19 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         y = this._headerMaxDelta;
 
         if (this.keepCondensedHeader) {
-          this._setHeaderState(ctx.HEADER_STATE_CONDENSED);
+          this._setHeaderState(2);
         } else {
-          this._setHeaderState(ctx.HEADER_STATE_HIDDEN);
+          this._setHeaderState(1);
         }
       } else if (this.condenses && scrollTop >= this._headerMargin) {
         y = Math.max(y, this._headerMargin);
-        this._setHeaderState(ctx.HEADER_STATE_CONDENSED);
+        this._setHeaderState(2);
 
       } else if (y === 0) {
-        this._setHeaderState(ctx.HEADER_STATE_EXPANDED);
+        this._setHeaderState(0);
 
       } else {
-        this._setHeaderState(ctx.HEADER_STATE_INTERPOLATED);
+        this._setHeaderState(3);
       }
 
       if (!this.fixed && y !== this._y) {
@@ -55234,12 +55267,24 @@ styles. All other styles should exist as single lines."
       event.detail.keyboardEvent.preventDefault();
     },
 
+    get _isRTL() {
+      return window.getComputedStyle(this)['direction'] === 'rtl';
+    },
+
     _onLeftKey: function() {
-      this._focusPrevious();
+      if (this._isRTL) {
+        this._focusNext();
+      } else {
+        this._focusPrevious();
+      }
     },
 
     _onRightKey: function() {
-      this._focusNext();
+      if (this._isRTL) {
+        this._focusPrevious();
+      } else {
+        this._focusNext();
+      }
     },
 
     _onKeydown: function(event) {
@@ -55382,7 +55427,10 @@ styles. All other styles should exist as single lines."
           -ms-user-select: none;
           -webkit-user-select: none;
         user-select: none;
-        -webkit-tap-highlight-color: rgba(0,0,0,0);
+
+        /* NOTE: Both values are needed, since some phones require the value to be `transparent`. */
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        -webkit-tap-highlight-color: transparent;
 
         @apply(--paper-tabs);
       }
@@ -55548,14 +55596,6 @@ styles. All other styles should exist as single lines."
         alignBottom: {
           type: Boolean,
           value: false
-        },
-
-        /**
-         * Gets or sets the selected element. The default is to use the index of the item.
-         */
-        selected: {
-          type: String,
-          notify: true
         },
 
         selectable: {
@@ -55759,7 +55799,13 @@ styles. All other styles should exist as single lines."
         // bar animation: expand
         this.$.selectionBar.classList.add('expand');
 
-        if (oldIndex < index) {
+        var moveRight = oldIndex < index;
+        var isRTL = this._isRTL;
+        if (isRTL) {
+          moveRight = !moveRight;
+        }
+
+        if (moveRight) {
           this._positionBar(this._calcPercent(tabRect.left + tabRect.width - oldRect.left, w) - m,
               this._left);
         } else {
@@ -57394,7 +57440,7 @@ styles. All other styles should exist as single lines."
         },
 
         _cleanCodeOutput: function() {
-          this.code = Polymer.dom(this).innerHTML.replace(/ class="([\S\s]*?)"| role="([\S\s]*?)"| tabindex="([\S\s]*?)"| value="([\S\s]*?)"| style="([\S\s]*?)"| toggles|=""| aria-\w+="([\S\s]*?)"/g, '');
+          this.code = Polymer.dom(this).innerHTML.replace(/ ?(class|role|tabindex|value|style|toggles|aria-\w+)?="([\S\s]*?)"/g, '');
         },
 
         _setProp: function(prop, val, style, arr) {
