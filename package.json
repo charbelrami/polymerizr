@@ -1,6 +1,6 @@
 {
   "name": "polymerizr",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Polymer elements WYSIWYG editor",
   "main": "index.html",
   "scripts": {
