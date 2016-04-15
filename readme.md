@@ -17,12 +17,6 @@ Polymer elements WYSIWYG editor
 ## Installation
 
 - Clone the repository
-- Install *vulcanize* and *polyserve* globally
-
-```sh
-$ npm i -g vulcanize polyserve
-```
-
 - `cd` into directory and install local dependencies
 
 ```sh
