@@ -40,7 +40,7 @@ $ npm run build
 ### Run local server
 
 ```sh
-$ polyserve
+$ npm run serve
 ```
 
 ### Bump version
